@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 风水户型分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'tdesign': {
+                            'blue': '#0052d9',
+                            'blue-light': '#266fe8',
+                            'gray': '#f3f3f3',
+                            'gray-dark': '#e7e7e7',
+                            'text': '#000000',
+                            'text-secondary': '#666666',
+                            'border': '#e7e7e7'
+                        }
+                    },
+                    borderRadius: {
+                        'tdesign': '6px'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- iPhone 15 Pro 屏幕容器 -->
+    <div class="w-[393px] h-[852px] mx-auto bg-white rounded-[47px] shadow-2xl overflow-hidden relative" style="border: 8px solid #1d1d1f;">
+        <!-- 状态栏 -->
+        <div class="flex justify-between items-center px-6 pt-3 pb-1 text-black text-sm font-medium">
+            <span>9:41</span>
+            <div class="flex items-center space-x-1">
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <span class="text-xs">100%</span>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-tdesign-border">
+            <button class="w-8 h-8 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+            <h1 class="text-lg font-semibold text-tdesign-text">登录</h1>
+            <div class="w-8"></div>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="flex-1 overflow-y-auto">
+            <!-- 登录表单 -->
+            <div class="px-6 py-8">
+                <!-- Logo和标题 -->
+                <div class="text-center mb-8">
+                    <div class="w-20 h-20 bg-gradient-to-r from-tdesign-blue to-tdesign-blue-light rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-tdesign-text mb-2">风水户型分析</h2>
+                    <p class="text-tdesign-text-secondary">专业的AI风水分析平台</p>
+                </div>
+
+                <!-- 登录选项 -->
+                <div class="space-y-4">
+                    <!-- 微信登录 -->
+                    <button class="w-full bg-green-500 text-white py-4 rounded-tdesign font-medium flex items-center justify-center space-x-3">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.162 4.203 2.969 5.543-.396-.855-.609-1.8-.609-2.79 0-3.417 2.961-6.188 6.613-6.188 1.674 0 3.204.656 4.332 1.73.696-.556 1.486-1.01 2.343-1.337C15.618 3.834 12.491 2.188 8.691 2.188zm7.308 0c-1.674 0-3.204.656-4.332 1.73-.696-.556-1.486-1.01-2.343-1.337C11.382 3.834 14.509 2.188 18.309 2.188 23.109 2.188 27 5.476 27 9.53c0 2.212-1.162 4.203-2.969 5.543.396-.855.609-1.8.609-2.79 0-3.417-2.961-6.188-6.613-6.188z"/>
+                        </svg>
+                        <span>微信登录</span>
+                    </button>
+
+                    <!-- 手机号登录 -->
+                    <button class="w-full bg-tdesign-blue text-white py-4 rounded-tdesign font-medium flex items-center justify-center space-x-3">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                        </svg>
+                        <span>手机号登录</span>
+                    </button>
+
+                    <!-- 游客模式 -->
+                    <button class="w-full bg-tdesign-gray text-tdesign-text py-4 rounded-tdesign font-medium">
+                        游客模式（功能受限）
+                    </button>
+                </div>
+
+                <!-- 登录协议 -->
+                <div class="mt-8 text-center">
+                    <p class="text-xs text-tdesign-text-secondary">
+                        登录即表示同意
+                        <span class="text-tdesign-blue">《用户协议》</span>
+                        和
+                        <span class="text-tdesign-blue">《隐私政策》</span>
+                    </p>
+                </div>
+
+                <!-- 功能介绍 -->
+                <div class="mt-12">
+                    <h3 class="text-lg font-semibold text-tdesign-text mb-4">功能介绍</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-tdesign-blue bg-opacity-10 rounded-tdesign flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-tdesign-blue" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-tdesign-text">AI风水分析</h4>
+                                <p class="text-sm text-tdesign-text-secondary">上传户型图，获得专业的AI风水分析报告</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-tdesign flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-tdesign-text">社区互动</h4>
+                                <p class="text-sm text-tdesign-text-secondary">分享分析结果，与其他用户交流风水心得</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 rounded-tdesign flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-tdesign-text">专业建议</h4>
+                                <p class="text-sm text-tdesign-text-secondary">根据生辰八字提供个性化风水布局建议</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的 - 风水户型分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'tdesign': {
+                            'blue': '#0052d9',
+                            'blue-light': '#266fe8',
+                            'gray': '#f3f3f3',
+                            'gray-dark': '#e7e7e7',
+                            'text': '#000000',
+                            'text-secondary': '#666666',
+                            'border': '#e7e7e7'
+                        }
+                    },
+                    borderRadius: {
+                        'tdesign': '6px'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- iPhone 15 Pro 屏幕容器 -->
+    <div class="w-[393px] h-[852px] mx-auto bg-white rounded-[47px] shadow-2xl overflow-hidden relative" style="border: 8px solid #1d1d1f;">
+        <!-- 状态栏 -->
+        <div class="flex justify-between items-center px-6 pt-3 pb-1 text-black text-sm font-medium">
+            <span>9:41</span>
+            <div class="flex items-center space-x-1">
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <span class="text-xs">100%</span>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-tdesign-border">
+            <h1 class="text-lg font-semibold text-tdesign-text">我的</h1>
+            <button class="w-8 h-8 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="flex-1 overflow-y-auto pb-20">
+            <!-- 用户信息区域 -->
+            <div class="bg-gradient-to-r from-tdesign-blue to-tdesign-blue-light p-6 text-white">
+                <div class="flex items-center space-x-4">
+                    <img src="https://via.placeholder.com/80x80/ffffff/0052d9?text=头像" alt="用户头像" class="w-20 h-20 rounded-full border-2 border-white">
+                    <div class="flex-1">
+                        <h2 class="text-xl font-semibold mb-1">风水爱好者</h2>
+                        <p class="text-sm opacity-90 mb-2">ID: 123456789</p>
+                        <div class="flex items-center space-x-4 text-sm">
+                            <div class="text-center">
+                                <div class="font-semibold">12</div>
+                                <div class="opacity-80">发布</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="font-semibold">156</div>
+                                <div class="opacity-80">获赞</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="font-semibold">23</div>
+                                <div class="opacity-80">关注</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 功能菜单 -->
+            <div class="p-4 space-y-4">
+                <!-- 我的内容 -->
+                <div class="bg-white rounded-tdesign p-4 border border-tdesign-border">
+                    <h3 class="text-base font-semibold text-tdesign-text mb-3">我的内容</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-tdesign-blue bg-opacity-10 rounded-tdesign flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-tdesign-blue" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-tdesign-text">我的发布</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-tdesign-text-secondary">12</span>
+                                <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-tdesign flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.8a2.8 2.8 0 001.8 2.6l3.2.9 3.2-.9a2.8 2.8 0 001.8-2.6v-5.8a3 3 0 00-3-3H9a3 3 0 00-3 3z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-tdesign-text">我的收藏</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-tdesign-text-secondary">8</span>
+                                <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-orange-100 rounded-tdesign flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-tdesign-text">我的评论</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-tdesign-text-secondary">45</span>
+                                <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-purple-100 rounded-tdesign flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-tdesign-text">分析记录</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-tdesign-text-secondary">12</span>
+                                <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 消息中心 -->
+                <div class="bg-white rounded-tdesign p-4 border border-tdesign-border">
+                    <h3 class="text-base font-semibold text-tdesign-text mb-3">消息中心</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="relative">
+                                    <div class="w-8 h-8 bg-red-100 rounded-tdesign flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs">3</div>
+                                </div>
+                                <div>
+                                    <span class="text-tdesign-text">系统通知</span>
+                                    <p class="text-xs text-tdesign-text-secondary">有新消息</p>
+                                </div>
+                            </div>
+                            <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-tdesign flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-tdesign-text">评论回复</span>
+                            </div>
+                            <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-tdesign flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.8a2.8 2.8 0 001.8 2.6l3.2.9 3.2-.9a2.8 2.8 0 001.8-2.6v-5.8a3 3 0 00-3-3H9a3 3 0 00-3 3z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-tdesign-text">点赞通知</span>
+                            </div>
+                            <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 设置 -->
+                <div class="bg-white rounded-tdesign p-4 border border-tdesign-border">
+                    <h3 class="text-base font-semibold text-tdesign-text mb-3">设置</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-gray-100 rounded-tdesign flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-tdesign-text">账户设置</span>
+                            </div>
+                            <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-gray-100 rounded-tdesign flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 2 2 0 012 2 1 1 0 102 0 4 4 0 00-4-4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-tdesign-text">隐私设置</span>
+                            </div>
+                            <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+
+                        <div class="flex items-center justify-between py-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-gray-100 rounded-tdesign flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-tdesign-text">关于我们</span>
+                            </div>
+                            <svg class="w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 退出登录 -->
+                <div class="p-4">
+                    <button class="w-full bg-red-500 text-white py-3 rounded-tdesign font-medium">
+                        退出登录
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部 TabBar -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-tdesign-border">
+            <div class="flex">
+                <div class="flex-1 flex flex-col items-center py-2 text-tdesign-text-secondary">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                    </svg>
+                    <span class="text-xs">首页</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center py-2 text-tdesign-text-secondary">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-xs">分析</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center py-2 text-tdesign-blue">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-xs font-medium">我的</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

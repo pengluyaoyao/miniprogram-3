@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 风水户型分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'tdesign': {
+                            'blue': '#0052d9',
+                            'blue-light': '#266fe8',
+                            'gray': '#f3f3f3',
+                            'gray-dark': '#e7e7e7',
+                            'text': '#000000',
+                            'text-secondary': '#666666',
+                            'border': '#e7e7e7'
+                        }
+                    },
+                    borderRadius: {
+                        'tdesign': '6px'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- iPhone 15 Pro 屏幕容器 -->
+    <div class="w-[393px] h-[852px] mx-auto bg-white rounded-[47px] shadow-2xl overflow-hidden relative" style="border: 8px solid #1d1d1f;">
+        <!-- 状态栏 -->
+        <div class="flex justify-between items-center px-6 pt-3 pb-1 text-black text-sm font-medium">
+            <span>9:41</span>
+            <div class="flex items-center space-x-1">
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <div class="w-4 h-2 bg-black rounded-sm"></div>
+                <span class="text-xs">100%</span>
+            </div>
+        </div>
+
+        <!-- 导航栏 -->
+        <div class="flex items-center justify-between px-4 py-3 bg-white border-b border-tdesign-border">
+            <h1 class="text-lg font-semibold text-tdesign-text">风水户型分析</h1>
+            <button class="w-8 h-8 flex items-center justify-center">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="flex-1 overflow-y-auto pb-20">
+            <!-- 搜索栏 -->
+            <div class="p-4 bg-white">
+                <div class="relative">
+                    <input type="text" placeholder="搜索户型、风水..." 
+                           class="w-full pl-10 pr-4 py-2 bg-tdesign-gray rounded-tdesign text-sm border-0 focus:outline-none">
+                    <svg class="absolute left-3 top-2.5 w-4 h-4 text-tdesign-text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Feed 流 -->
+            <div class="px-4 space-y-4">
+                <!-- 户型卡片 1 -->
+                <div class="bg-white rounded-tdesign shadow-sm border border-tdesign-border overflow-hidden">
+                    <div class="relative">
+                        <img src="https://via.placeholder.com/350x200/4f46e5/ffffff?text=户型图1" alt="户型图" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                            三室两厅
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-tdesign-text mb-2">南北通透三居室，财位布局优化建议</h3>
+                        <p class="text-sm text-tdesign-text-secondary mb-3 line-clamp-2">
+                            根据您的生辰八字分析，建议将主卧床头朝向东南，客厅财位放置绿色植物...
+                        </p>
+                        <div class="flex items-center justify-between text-xs text-tdesign-text-secondary">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.8a2.8 2.8 0 001.8 2.6l3.2.9 3.2-.9a2.8 2.8 0 001.8-2.6v-5.8a3 3 0 00-3-3H9a3 3 0 00-3 3z"></path>
+                                    </svg>
+                                    <span>128</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>23</span>
+                                </div>
+                            </div>
+                            <span>2小时前</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 户型卡片 2 -->
+                <div class="bg-white rounded-tdesign shadow-sm border border-tdesign-border overflow-hidden">
+                    <div class="relative">
+                        <img src="https://via.placeholder.com/350x200/059669/ffffff?text=户型图2" alt="户型图" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                            两室一厅
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-tdesign-text mb-2">小户型厨房风水布局，提升财运</h3>
+                        <p class="text-sm text-tdesign-text-secondary mb-3 line-clamp-2">
+                            厨房位于西北角，建议调整灶台位置，避免水火相冲，同时增加收纳空间...
+                        </p>
+                        <div class="flex items-center justify-between text-xs text-tdesign-text-secondary">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.8a2.8 2.8 0 001.8 2.6l3.2.9 3.2-.9a2.8 2.8 0 001.8-2.6v-5.8a3 3 0 00-3-3H9a3 3 0 00-3 3z"></path>
+                                    </svg>
+                                    <span>89</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>15</span>
+                                </div>
+                            </div>
+                            <span>5小时前</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 户型卡片 3 -->
+                <div class="bg-white rounded-tdesign shadow-sm border border-tdesign-border overflow-hidden">
+                    <div class="relative">
+                        <img src="https://via.placeholder.com/350x200/dc2626/ffffff?text=户型图3" alt="户型图" class="w-full h-48 object-cover">
+                        <div class="absolute top-2 right-2 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                            四室两厅
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-tdesign-text mb-2">复式楼楼梯位置对财运的影响分析</h3>
+                        <p class="text-sm text-tdesign-text-secondary mb-3 line-clamp-2">
+                            楼梯正对大门，建议在楼梯口放置屏风或绿植化解，同时调整主卧位置...
+                        </p>
+                        <div class="flex items-center justify-between text-xs text-tdesign-text-secondary">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.8a2.8 2.8 0 001.8 2.6l3.2.9 3.2-.9a2.8 2.8 0 001.8-2.6v-5.8a3 3 0 00-3-3H9a3 3 0 00-3 3z"></path>
+                                    </svg>
+                                    <span>156</span>
+                                </div>
+                                <div class="flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span>31</span>
+                                </div>
+                            </div>
+                            <span>1天前</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部 TabBar -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-tdesign-border">
+            <div class="flex">
+                <div class="flex-1 flex flex-col items-center py-2 text-tdesign-blue">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                    </svg>
+                    <span class="text-xs font-medium">首页</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center py-2 text-tdesign-text-secondary">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-xs">分析</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center py-2 text-tdesign-text-secondary">
+                    <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-xs">我的</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
