@@ -4,7 +4,6 @@
     "t-upload": "tdesign-miniprogram/upload/upload",
     "t-input": "tdesign-miniprogram/input/input",
     "t-textarea": "tdesign-miniprogram/textarea/textarea",
-    "t-picker": "tdesign-miniprogram/picker/picker",
     "t-button": "tdesign-miniprogram/button/button",
     "t-tag": "tdesign-miniprogram/tag/tag",
     "t-loading": "tdesign-miniprogram/loading/loading",

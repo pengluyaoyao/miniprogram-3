@@ -34,31 +34,12 @@
     <!-- 房屋朝向 -->
     <view class="form-item">
       <view class="form-label">房屋朝向</view>
-      <t-picker
-        title="选择朝向"
-        value="{{orientationIndex}}"
-        range="{{orientationOptions}}"
-        bind:change="onOrientationChange"
-      >
-        <view class="picker-display">
-          {{orientationOptions[orientationIndex] || '请选择朝向'}}
-        </view>
-      </t-picker>
-    </view>
-
-    <!-- 房屋类型 -->
-    <view class="form-item">
-      <view class="form-label">房屋类型</view>
-      <t-picker
-        title="选择类型"
-        value="{{houseTypeIndex}}"
-        range="{{houseTypeOptions}}"
-        bind:change="onHouseTypeChange"
-      >
-        <view class="picker-display">
-          {{houseTypeOptions[houseTypeIndex] || '请选择类型'}}
-        </view>
-      </t-picker>
+      <t-input
+        placeholder="请输入房屋朝向，如：南北通透"
+        value="{{formData.orientation}}"
+        bind:change="onFormChange"
+        data-field="orientation"
+      />
     </view>
 
     <!-- 房屋面积 -->

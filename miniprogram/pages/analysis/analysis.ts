@@ -2,7 +2,6 @@
 interface FormData {
   birthInfo: string;
   orientation: string;
-  houseType: string;
   area: string;
 }
 
@@ -34,13 +33,8 @@ Page({
     formData: {
       birthInfo: '',
       orientation: '',
-      houseType: '',
       area: ''
     } as FormData,
-    orientationOptions: ['正北', '东北', '正东', '东南', '正南', '西南', '正西', '西北'],
-    orientationIndex: -1,
-    houseTypeOptions: ['新房', '二手房', '租房'],
-    houseTypeIndex: -1,
     focusOptions: [
       { value: 'wealth', label: '财位', selected: true },
       { value: 'bedroom', label: '主卧', selected: false },
@@ -107,25 +101,6 @@ Page({
     this.checkCanPublish();
   },
 
-  // 朝向选择变化
-  onOrientationChange(e: any) {
-    const index = e.detail.value;
-    this.setData({
-      orientationIndex: index,
-      'formData.orientation': this.data.orientationOptions[index]
-    });
-    this.checkCanPublish();
-  },
-
-  // 房屋类型选择变化
-  onHouseTypeChange(e: any) {
-    const index = e.detail.value;
-    this.setData({
-      houseTypeIndex: index,
-      'formData.houseType': this.data.houseTypeOptions[index]
-    });
-    this.checkCanPublish();
-  },
 
   // 关注方面标签点击
   onFocusTagTap(e: any) {
@@ -143,7 +118,7 @@ Page({
   checkCanPublish() {
     const { uploadFiles, formData } = this.data;
     const hasImage = uploadFiles.length > 0;
-    const hasBasicInfo = formData.birthInfo && formData.orientation && formData.houseType && formData.area;
+    const hasBasicInfo = formData.birthInfo && formData.orientation && formData.area;
     
     this.setData({
       canPublish: hasImage && hasBasicInfo

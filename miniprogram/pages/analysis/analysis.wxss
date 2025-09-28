@@ -47,12 +47,6 @@
   font-weight: 500;
 }
 
-.picker-display {
-  padding: 24rpx 0;
-  font-size: 28rpx;
-  color: #666666;
-  border-bottom: 1rpx solid #e7e7e7;
-}
 
 /* 关注方面标签 */
 .tag-container {
