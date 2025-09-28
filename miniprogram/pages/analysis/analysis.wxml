@@ -1,0 +1,151 @@
+<!--分析户型页面-->
+<view class="analysis-container">
+  <!-- 上传户型图 -->
+  <view class="section">
+    <view class="section-title">上传户型图</view>
+    <t-upload
+      files="{{uploadFiles}}"
+      bind:change="onUploadChange"
+      bind:remove="onUploadRemove"
+      bind:success="onUploadSuccess"
+      bind:fail="onUploadFail"
+      max="3"
+      theme="image"
+      size="large"
+    />
+    <view class="upload-tip">支持JPG、PNG格式，最多上传3张</view>
+  </view>
+
+  <!-- 基本信息 -->
+  <view class="section">
+    <view class="section-title">基本信息</view>
+    
+    <!-- 生辰八字 -->
+    <view class="form-item">
+      <view class="form-label">生辰八字</view>
+      <t-input
+        placeholder="请输入出生日期时间，如：1990-01-01 08:30 男"
+        value="{{formData.birthInfo}}"
+        bind:change="onFormChange"
+        data-field="birthInfo"
+      />
+    </view>
+
+    <!-- 房屋朝向 -->
+    <view class="form-item">
+      <view class="form-label">房屋朝向</view>
+      <t-picker
+        title="选择朝向"
+        value="{{orientationIndex}}"
+        range="{{orientationOptions}}"
+        bind:change="onOrientationChange"
+      >
+        <view class="picker-display">
+          {{orientationOptions[orientationIndex] || '请选择朝向'}}
+        </view>
+      </t-picker>
+    </view>
+
+    <!-- 房屋类型 -->
+    <view class="form-item">
+      <view class="form-label">房屋类型</view>
+      <t-picker
+        title="选择类型"
+        value="{{houseTypeIndex}}"
+        range="{{houseTypeOptions}}"
+        bind:change="onHouseTypeChange"
+      >
+        <view class="picker-display">
+          {{houseTypeOptions[houseTypeIndex] || '请选择类型'}}
+        </view>
+      </t-picker>
+    </view>
+
+    <!-- 房屋面积 -->
+    <view class="form-item">
+      <view class="form-label">房屋面积</view>
+      <t-input
+        placeholder="请输入面积，如：98"
+        value="{{formData.area}}"
+        bind:change="onFormChange"
+        data-field="area"
+        type="number"
+      />
+    </view>
+  </view>
+
+  <!-- 关注方面 -->
+  <view class="section">
+    <view class="section-title">关注方面</view>
+    <view class="tag-container">
+      <t-tag
+        wx:for="{{focusOptions}}"
+        wx:key="value"
+        theme="{{item.selected ? 'primary' : 'default'}}"
+        size="medium"
+        bind:tap="onFocusTagTap"
+        data-value="{{item.value}}"
+        data-index="{{index}}"
+      >
+        {{item.label}}
+      </t-tag>
+    </view>
+  </view>
+
+  <!-- 分析结果 -->
+  <view class="section" wx:if="{{analysisResult}}">
+    <view class="section-title">
+      分析结果
+      <view class="status-indicator">
+        <t-icon name="check-circle-filled" size="24rpx" color="#00a870" />
+        <text class="status-text">分析完成</text>
+      </view>
+    </view>
+    
+    <view class="analysis-results">
+      <view 
+        class="result-item" 
+        wx:for="{{analysisResult}}" 
+        wx:key="type"
+        style="border-left-color: {{item.color}}; background-color: {{item.bgColor}}"
+      >
+        <view class="result-title" style="color: {{item.titleColor}}">{{item.title}}</view>
+        <view class="result-content" style="color: {{item.contentColor}}">{{item.content}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <t-button
+      theme="primary"
+      size="large"
+      block
+      bind:tap="onPublishTap"
+      disabled="{{!canPublish}}"
+    >
+      发布大家帮我看
+    </t-button>
+    
+    <t-button
+      theme="default"
+      size="large"
+      block
+      bind:tap="onReAnalyzeTap"
+      style="margin-top: 24rpx;"
+    >
+      重新分析
+    </t-button>
+  </view>
+
+  <!-- 分析中状态 -->
+  <view class="analyzing-overlay" wx:if="{{isAnalyzing}}">
+    <view class="analyzing-content">
+      <t-loading size="60rpx" />
+      <text class="analyzing-text">AI正在分析中，请稍候...</text>
+    </view>
+  </view>
+</view>
+
+<!-- Toast提示 -->
+<t-toast id="t-toast" />

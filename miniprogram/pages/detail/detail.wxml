@@ -1,0 +1,134 @@
+<!--户型详情页面-->
+<view class="detail-container">
+  <!-- 户型图展示 -->
+  <view class="image-section">
+    <t-image
+      src="{{houseDetail.image}}"
+      mode="aspectFill"
+      class="main-image"
+      bind:tap="onImageTap"
+    />
+    <view class="house-type-tag">
+      <t-tag theme="dark" size="medium">{{houseDetail.type}}</t-tag>
+    </view>
+    <view class="image-actions">
+      <view class="action-btn" bind:tap="onLikeTap">
+        <t-icon name="heart" size="40rpx" color="{{houseDetail.isLiked ? '#ff4d4f' : '#ffffff'}}" />
+      </view>
+      <view class="action-btn" bind:tap="onShareTap">
+        <t-icon name="share" size="40rpx" color="#ffffff" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 标题和基本信息 -->
+  <view class="info-section">
+    <view class="title">{{houseDetail.title}}</view>
+    <view class="meta-info">
+      <view class="meta-item">
+        <t-icon name="user" size="32rpx" />
+        <text>{{houseDetail.author}}</text>
+      </view>
+      <view class="meta-item">
+        <t-icon name="time" size="32rpx" />
+        <text>{{houseDetail.time}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 互动数据 -->
+  <view class="interaction-section">
+    <view class="interaction-stats">
+      <view class="stat-item" bind:tap="onLikeTap">
+        <t-icon name="thumb-up" size="32rpx" color="{{houseDetail.isLiked ? '#ff4d4f' : '#666666'}}" />
+        <text class="stat-text">{{houseDetail.likes}}</text>
+      </view>
+      <view class="stat-item" bind:tap="onCommentTap">
+        <t-icon name="chat" size="32rpx" />
+        <text class="stat-text">{{houseDetail.comments}}</text>
+      </view>
+      <view class="stat-item" bind:tap="onCollectTap">
+        <t-icon name="bookmark" size="32rpx" color="{{houseDetail.isCollected ? '#ff4d4f' : '#666666'}}" />
+        <text class="stat-text">收藏</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI分析报告 -->
+  <view class="analysis-section">
+    <view class="section-title">AI风水分析报告</view>
+    <view class="analysis-results">
+      <view 
+        class="result-item" 
+        wx:for="{{houseDetail.analysisResult}}" 
+        wx:key="type"
+        style="border-left-color: {{item.color}}; background-color: {{item.bgColor}}"
+      >
+        <view class="result-title" style="color: {{item.titleColor}}">{{item.title}}</view>
+        <view class="result-content" style="color: {{item.contentColor}}">{{item.content}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 评论区域 -->
+  <view class="comments-section">
+    <view class="section-header">
+      <view class="section-title">评论 ({{comments.length}})</view>
+      <view class="view-all" bind:tap="onViewAllComments">查看全部</view>
+    </view>
+    
+    <view class="comments-list">
+      <view 
+        class="comment-item" 
+        wx:for="{{comments}}" 
+        wx:key="id"
+      >
+        <t-avatar
+          src="{{item.avatar}}"
+          size="80rpx"
+          class="comment-avatar"
+        />
+        <view class="comment-content">
+          <view class="comment-header">
+            <text class="comment-author">{{item.author}}</text>
+            <text class="comment-time">{{item.time}}</text>
+          </view>
+          <view class="comment-text">{{item.content}}</view>
+          <view class="comment-actions">
+            <view class="comment-action" bind:tap="onCommentLike" data-id="{{item.id}}">
+              <t-icon name="thumb-up" size="24rpx" />
+              <text>{{item.likes}}</text>
+            </view>
+            <view class="comment-action" bind:tap="onReply" data-id="{{item.id}}">
+              回复
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 发表评论 -->
+    <view class="comment-input-section">
+      <t-avatar
+        src="{{userAvatar}}"
+        size="64rpx"
+        class="input-avatar"
+      />
+      <view class="comment-input-wrapper">
+        <t-input
+          placeholder="说说你的看法..."
+          value="{{commentInput}}"
+          bind:change="onCommentInputChange"
+          bind:confirm="onCommentSubmit"
+          class="comment-input"
+        />
+        <view class="submit-btn" bind:tap="onCommentSubmit">
+          <t-icon name="send" size="32rpx" color="#0052d9" />
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- Toast提示 -->
+<t-toast id="t-toast" />

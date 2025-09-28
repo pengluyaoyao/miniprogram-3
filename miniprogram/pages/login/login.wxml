@@ -1,0 +1,97 @@
+<!--登录页面-->
+<view class="login-container">
+  <!-- Logo和标题 -->
+  <view class="logo-section">
+    <view class="logo">
+      <t-icon name="home" size="80rpx" color="#ffffff" />
+    </view>
+    <view class="app-title">风水户型分析</view>
+    <view class="app-desc">专业的AI风水分析平台</view>
+  </view>
+
+  <!-- 登录选项 -->
+  <view class="login-options">
+    <!-- 微信登录 -->
+    <t-button
+      theme="primary"
+      size="large"
+      block
+      bind:tap="onWechatLogin"
+      style="background-color: #07c160; border-color: #07c160; margin-bottom: 24rpx;"
+    >
+      <t-icon name="logo-wechat" size="40rpx" style="margin-right: 16rpx;" />
+      微信登录
+    </t-button>
+
+    <!-- 手机号登录 -->
+    <t-button
+      theme="primary"
+      size="large"
+      block
+      bind:tap="onPhoneLogin"
+      style="margin-bottom: 24rpx;"
+    >
+      <t-icon name="mobile" size="40rpx" style="margin-right: 16rpx;" />
+      手机号登录
+    </t-button>
+
+    <!-- 游客模式 -->
+    <t-button
+      theme="default"
+      size="large"
+      block
+      bind:tap="onGuestMode"
+    >
+      游客模式（功能受限）
+    </t-button>
+  </view>
+
+  <!-- 登录协议 -->
+  <view class="agreement-section">
+    <text class="agreement-text">
+      登录即表示同意
+      <text class="link-text" bind:tap="onUserAgreement">《用户协议》</text>
+      和
+      <text class="link-text" bind:tap="onPrivacyPolicy">《隐私政策》</text>
+    </text>
+  </view>
+
+  <!-- 功能介绍 -->
+  <view class="features-section">
+    <view class="features-title">功能介绍</view>
+    <view class="feature-list">
+      <view class="feature-item">
+        <view class="feature-icon">
+          <t-icon name="image" size="32rpx" color="#0052d9" />
+        </view>
+        <view class="feature-content">
+          <view class="feature-title">AI风水分析</view>
+          <view class="feature-desc">上传户型图，获得专业的AI风水分析报告</view>
+        </view>
+      </view>
+
+      <view class="feature-item">
+        <view class="feature-icon">
+          <t-icon name="chat" size="32rpx" color="#00a870" />
+        </view>
+        <view class="feature-content">
+          <view class="feature-title">社区互动</view>
+          <view class="feature-desc">分享分析结果，与其他用户交流风水心得</view>
+        </view>
+      </view>
+
+      <view class="feature-item">
+        <view class="feature-icon">
+          <t-icon name="edit" size="32rpx" color="#8b5cf6" />
+        </view>
+        <view class="feature-content">
+          <view class="feature-title">专业建议</view>
+          <view class="feature-desc">根据生辰八字提供个性化风水布局建议</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- Toast提示 -->
+<t-toast id="t-toast" />

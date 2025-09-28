@@ -1,0 +1,171 @@
+<!--我的页面-->
+<view class="profile-container">
+  <!-- 用户信息区域 -->
+  <view class="user-header">
+    <view class="user-info">
+      <t-avatar
+        src="{{userInfo.avatar}}"
+        size="160rpx"
+        class="user-avatar"
+        bind:tap="onAvatarTap"
+      />
+      <view class="user-details">
+        <view class="username">{{userInfo.nickname}}</view>
+        <view class="user-id">ID: {{userInfo.id}}</view>
+        <view class="user-stats">
+          <view class="stat-item">
+            <text class="stat-number">{{userInfo.stats.posts}}</text>
+            <text class="stat-label">发布</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-number">{{userInfo.stats.likes}}</text>
+            <text class="stat-label">获赞</text>
+          </view>
+          <view class="stat-item">
+            <text class="stat-number">{{userInfo.stats.follows}}</text>
+            <text class="stat-label">关注</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的内容 -->
+  <view class="content-section">
+    <view class="section-title">我的内容</view>
+    <t-cell-group>
+      <t-cell
+        title="我的发布"
+        left-icon="image"
+        arrow
+        bind:tap="onMyPostsTap"
+      >
+        <view slot="right-icon">
+          <text class="count-badge">{{userInfo.stats.posts}}</text>
+        </view>
+      </t-cell>
+      
+      <t-cell
+        title="我的收藏"
+        left-icon="heart"
+        arrow
+        bind:tap="onMyCollectionsTap"
+      >
+        <view slot="right-icon">
+          <text class="count-badge">{{userInfo.stats.collections}}</text>
+        </view>
+      </t-cell>
+      
+      <t-cell
+        title="我的评论"
+        left-icon="chat"
+        arrow
+        bind:tap="onMyCommentsTap"
+      >
+        <view slot="right-icon">
+          <text class="count-badge">{{userInfo.stats.comments}}</text>
+        </view>
+      </t-cell>
+      
+      <t-cell
+        title="分析记录"
+        left-icon="edit"
+        arrow
+        bind:tap="onAnalysisHistoryTap"
+      >
+        <view slot="right-icon">
+          <text class="count-badge">{{userInfo.stats.analysis}}</text>
+        </view>
+      </t-cell>
+    </t-cell-group>
+  </view>
+
+  <!-- 消息中心 -->
+  <view class="message-section">
+    <view class="section-title">消息中心</view>
+    <t-cell-group>
+      <t-cell
+        title="系统通知"
+        left-icon="notification"
+        arrow
+        bind:tap="onSystemNotificationTap"
+      >
+        <t-badge slot="right-icon" count="{{messageCount.system}}" wx:if="{{messageCount.system > 0}}" />
+      </t-cell>
+      
+      <t-cell
+        title="评论回复"
+        left-icon="chat"
+        arrow
+        bind:tap="onCommentReplyTap"
+      />
+      
+      <t-cell
+        title="点赞通知"
+        left-icon="thumb-up"
+        arrow
+        bind:tap="onLikeNotificationTap"
+      />
+    </t-cell-group>
+  </view>
+
+  <!-- 设置 -->
+  <view class="settings-section">
+    <view class="section-title">设置</view>
+    <t-cell-group>
+      <t-cell
+        title="账户设置"
+        left-icon="setting"
+        arrow
+        bind:tap="onAccountSettingsTap"
+      />
+      
+      <t-cell
+        title="隐私设置"
+        left-icon="lock-on"
+        arrow
+        bind:tap="onPrivacySettingsTap"
+      />
+      
+      <t-cell
+        title="关于我们"
+        left-icon="help-circle"
+        arrow
+        bind:tap="onAboutTap"
+      />
+    </t-cell-group>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-section" wx:if="{{isLoggedIn}}">
+    <t-button
+      theme="danger"
+      size="large"
+      block
+      bind:tap="onLogoutTap"
+    >
+      退出登录
+    </t-button>
+  </view>
+
+  <!-- 未登录状态 -->
+  <view class="login-section" wx:if="{{!isLoggedIn}}">
+    <view class="login-prompt">
+      <t-icon name="user" size="120rpx" color="#ccc" />
+      <text class="login-text">请先登录</text>
+      <text class="login-desc">登录后可查看个人内容和设置</text>
+    </view>
+    <t-button
+      theme="primary"
+      size="large"
+      block
+      bind:tap="onLoginTap"
+      style="margin-top: 40rpx;"
+    >
+      立即登录
+    </t-button>
+  </view>
+</view>
+
+<!-- Toast提示 -->
+<t-toast id="t-toast" />

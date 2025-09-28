@@ -1,0 +1,132 @@
+/* 分析户型页面样式 */
+.analysis-container {
+  background-color: #f3f3f3;
+  min-height: 100vh;
+  padding: 24rpx;
+}
+
+/* 区块样式 */
+.section {
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid #e7e7e7;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 上传组件 */
+.upload-tip {
+  font-size: 24rpx;
+  color: #666666;
+  margin-top: 16rpx;
+}
+
+/* 表单样式 */
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #000000;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.picker-display {
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  color: #666666;
+  border-bottom: 1rpx solid #e7e7e7;
+}
+
+/* 关注方面标签 */
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+/* 分析结果 */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.status-text {
+  font-size: 24rpx;
+  color: #00a870;
+}
+
+.analysis-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.result-item {
+  padding: 24rpx;
+  border-radius: 8rpx;
+  border-left: 8rpx solid;
+}
+
+.result-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.result-content {
+  font-size: 26rpx;
+  line-height: 1.5;
+}
+
+/* 操作按钮 */
+.action-buttons {
+  padding: 24rpx 0 80rpx 0;
+}
+
+/* 分析中状态 */
+.analyzing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.analyzing-content {
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  padding: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+  min-width: 400rpx;
+}
+
+.analyzing-text {
+  font-size: 28rpx;
+  color: #666666;
+}
