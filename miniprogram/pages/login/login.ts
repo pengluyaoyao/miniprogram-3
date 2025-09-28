@@ -1,23 +1,25 @@
 // 登录页面逻辑
-interface UserInfo {
-  id: string;
-  nickname: string;
-  avatar: string;
-  stats: {
-    posts: number;
-    likes: number;
-    follows: number;
-    collections: number;
-    comments: number;
-    analysis: number;
-  };
-}
+import { userService } from '../../services/userService';
 
 Page({
-  data: {},
+  data: {
+    showPhoneForm: false,
+    phoneNumber: '',
+    smsCode: '',
+    smsCodeSent: false,
+    countdown: 0,
+    countdownTimer: null as any
+  },
 
   onLoad() {
     // 页面加载
+  },
+
+  onUnload() {
+    // 清除倒计时
+    if (this.data.countdownTimer) {
+      clearInterval(this.data.countdownTimer);
+    }
   },
 
   // 微信登录
@@ -27,72 +29,219 @@ Page({
         title: '登录中...'
       });
 
-      // 获取用户信息
-      const userProfile = await this.getUserProfile();
-      
-      // 模拟登录API调用
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      const userInfo: UserInfo = {
-        id: Date.now().toString(),
-        nickname: userProfile.nickName || '风水爱好者',
-        avatar: userProfile.avatarUrl || 'https://via.placeholder.com/160x160/0052d9/ffffff?text=头像',
-        stats: {
-          posts: 12,
-          likes: 156,
-          follows: 23,
-          collections: 8,
-          comments: 45,
-          analysis: 12
-        }
-      };
-
-      // 保存用户信息到本地存储
-      wx.setStorageSync('userInfo', userInfo);
+      const result = await userService.wechatLogin();
 
       wx.hideLoading();
-      wx.showToast({
-        title: '登录成功',
-        icon: 'success'
-      });
 
-      // 延迟返回上一页
-      setTimeout(() => {
-        wx.navigateBack();
-      }, 1500);
+      if (result.success) {
+        wx.showToast({
+          title: result.isNewUser ? '注册成功' : '登录成功',
+          icon: 'success'
+        });
 
+        // 延迟返回上一页
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 1500);
+      } else {
+        wx.showToast({
+          title: result.message || '登录失败',
+          icon: 'none'
+        });
+      }
     } catch (error) {
       wx.hideLoading();
       console.error('微信登录失败:', error);
       wx.showToast({
-        title: '登录失败',
+        title: '登录失败，请重试',
         icon: 'none'
       });
     }
   },
 
-  // 获取用户信息
-  getUserProfile(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      wx.getUserProfile({
-        desc: '用于完善用户资料',
-        success: (res) => {
-          resolve(res.userInfo);
-        },
-        fail: (error) => {
-          reject(error);
-        }
-      });
+  // 手机号登录按钮点击
+  onPhoneLogin() {
+    this.setData({
+      showPhoneForm: !this.data.showPhoneForm
     });
   },
 
-  // 手机号登录
-  onPhoneLogin() {
-    wx.showModal({
-      title: '手机号登录',
-      content: '手机号登录功能开发中，请使用微信登录',
-      showCancel: false,
-      confirmText: '知道了'
+  // 执行手机号登录
+  async doPhoneLogin() {
+    try {
+      wx.showLoading({
+        title: '登录中...'
+      });
+
+      const { phoneNumber, smsCode } = this.data;
+      
+      if (!phoneNumber || !smsCode) {
+        wx.hideLoading();
+        wx.showToast({
+          title: '请填写手机号和验证码',
+          icon: 'none'
+        });
+        return;
+      }
+
+      const result = await userService.phoneLogin(phoneNumber, smsCode);
+
+      wx.hideLoading();
+
+      if (result.success) {
+        wx.showToast({
+          title: '登录成功',
+          icon: 'success'
+        });
+
+        // 清空表单
+        this.setData({
+          phoneNumber: '',
+          smsCode: '',
+          smsCodeSent: false
+        });
+
+        // 延迟返回上一页
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 1500);
+      } else {
+        wx.showToast({
+          title: result.message || '登录失败',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('手机号登录失败:', error);
+      wx.showToast({
+        title: '登录失败，请重试',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 获取手机号
+  async onGetPhoneNumber(e: any) {
+    if (e.detail.code) {
+      try {
+        wx.showLoading({
+          title: '获取中...'
+        });
+
+        const phoneNumber = await userService.getPhoneNumber(e);
+        
+        wx.hideLoading();
+
+        if (phoneNumber) {
+          this.setData({
+            phoneNumber: phoneNumber
+          });
+          wx.showToast({
+            title: '获取手机号成功',
+            icon: 'success'
+          });
+        } else {
+          wx.showToast({
+            title: '获取手机号失败',
+            icon: 'none'
+          });
+        }
+      } catch (error) {
+        wx.hideLoading();
+        console.error('获取手机号失败:', error);
+        wx.showToast({
+          title: '获取手机号失败',
+          icon: 'none'
+        });
+      }
+    }
+  },
+
+  // 发送短信验证码
+  async sendSmsCode() {
+    const { phoneNumber } = this.data;
+    
+    if (!phoneNumber) {
+      wx.showToast({
+        title: '请先获取手机号',
+        icon: 'none'
+      });
+      return;
+    }
+
+    try {
+      wx.showLoading({
+        title: '发送中...'
+      });
+
+      const success = await userService.sendSmsCode(phoneNumber);
+      
+      wx.hideLoading();
+
+      if (success) {
+        wx.showToast({
+          title: '验证码已发送',
+          icon: 'success'
+        });
+
+        // 开始倒计时
+        this.startCountdown();
+      } else {
+        wx.showToast({
+          title: '发送失败，请重试',
+          icon: 'none'
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('发送短信验证码失败:', error);
+      wx.showToast({
+        title: '发送失败，请重试',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 开始倒计时
+  startCountdown() {
+    this.setData({
+      smsCodeSent: true,
+      countdown: 60
+    });
+
+    const timer = setInterval(() => {
+      const countdown = this.data.countdown - 1;
+      if (countdown <= 0) {
+        clearInterval(timer);
+        this.setData({
+          smsCodeSent: false,
+          countdown: 0,
+          countdownTimer: null
+        });
+      } else {
+        this.setData({
+          countdown: countdown
+        });
+      }
+    }, 1000);
+
+    this.setData({
+      countdownTimer: timer
+    });
+  },
+
+  // 手机号输入
+  onPhoneInput(e: any) {
+    this.setData({
+      phoneNumber: e.detail.value
+    });
+  },
+
+  // 验证码输入
+  onCodeInput(e: any) {
+    this.setData({
+      smsCode: e.detail.value
     });
   },
 

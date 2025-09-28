@@ -39,6 +39,48 @@
   margin-bottom: 48rpx;
 }
 
+/* 手机号登录表单 */
+.phone-login-form {
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  padding: 32rpx;
+  margin: 24rpx 0;
+  border: 1rpx solid #e7e7e7;
+}
+
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #000000;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.phone-input-wrapper,
+.code-input-wrapper {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+
+.phone-input,
+.code-input {
+  flex: 1;
+}
+
+.get-phone-btn,
+.send-code-btn {
+  flex-shrink: 0;
+  min-width: 160rpx;
+}
+
 /* 登录协议 */
 .agreement-section {
   text-align: center;

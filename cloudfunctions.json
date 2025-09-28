@@ -1,0 +1,46 @@
+{
+  "functions": [
+    {
+      "name": "userLogin",
+      "timeout": 20,
+      "envVariables": {},
+      "runtime": "Nodejs18.15"
+    },
+    {
+      "name": "phoneLogin",
+      "timeout": 20,
+      "envVariables": {},
+      "runtime": "Nodejs18.15"
+    },
+    {
+      "name": "getPhoneNumber",
+      "timeout": 20,
+      "envVariables": {},
+      "runtime": "Nodejs18.15"
+    },
+    {
+      "name": "sendSmsCode",
+      "timeout": 20,
+      "envVariables": {},
+      "runtime": "Nodejs18.15"
+    },
+    {
+      "name": "updateUserInfo",
+      "timeout": 20,
+      "envVariables": {},
+      "runtime": "Nodejs18.15"
+    },
+    {
+      "name": "updateUserStats",
+      "timeout": 20,
+      "envVariables": {},
+      "runtime": "Nodejs18.15"
+    },
+    {
+      "name": "deleteOldAvatar",
+      "timeout": 20,
+      "envVariables": {},
+      "runtime": "Nodejs18.15"
+    }
+  ]
+}

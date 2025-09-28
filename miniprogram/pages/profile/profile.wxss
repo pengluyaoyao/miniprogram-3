@@ -17,8 +17,32 @@
   gap: 32rpx;
 }
 
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .user-avatar {
   border: 4rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.edit-avatar-btn {
+  position: absolute;
+  bottom: 8rpx;
+  right: 8rpx;
+  width: 48rpx;
+  height: 48rpx;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
+  border: 2rpx solid #ffffff;
+}
+
+.edit-avatar-btn t-icon {
+  color: #0052d9 !important;
 }
 
 .user-details {
@@ -31,11 +55,6 @@
   margin-bottom: 8rpx;
 }
 
-.user-id {
-  font-size: 28rpx;
-  opacity: 0.9;
-  margin-bottom: 24rpx;
-}
 
 .user-stats {
   display: flex;

@@ -3,15 +3,19 @@
   <!-- 用户信息区域 -->
   <view class="user-header">
     <view class="user-info">
-      <t-avatar
-        src="{{userInfo.avatar}}"
-        size="160rpx"
-        class="user-avatar"
-        bind:tap="onAvatarTap"
-      />
+      <view class="avatar-wrapper">
+        <t-avatar
+          src="{{userInfo.avatar}}"
+          size="160rpx"
+          class="user-avatar"
+          bind:tap="onAvatarTap"
+        />
+        <view class="edit-avatar-btn" bind:tap="onEditProfileTap">
+          <t-icon name="edit" size="24rpx" color="#ffffff" />
+        </view>
+      </view>
       <view class="user-details">
         <view class="username">{{userInfo.nickname}}</view>
-        <view class="user-id">ID: {{userInfo.id}}</view>
         <view class="user-stats">
           <view class="stat-item">
             <text class="stat-number">{{userInfo.stats.posts}}</text>
