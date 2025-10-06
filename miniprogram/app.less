@@ -1,4 +1,57 @@
 /**app.wxss**/
+
+/* 修复TDesign字体加载问题 - 强制覆盖 */
+@font-face {
+  font-family: t;
+  src: none !important;
+}
+
+/* 禁用所有可能的字体加载 */
+@font-face {
+  font-family: "t";
+  src: none !important;
+}
+
+/* 强制重置图标字体 */
+.t-icon,
+.t-icon-base,
+[class*="t-icon"] {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  color: inherit !important;
+}
+
+.t-icon:before,
+.t-icon-base:before,
+[class*="t-icon"]:before {
+  content: '' !important;
+}
+
+/* 完全禁用TDesign的字体样式 */
+.t-icon {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', SimSun, sans-serif !important;
+}
+
+/* 为常用图标提供emoji替代 */
+.t-icon-edit:before { content: '✏️'; }
+.t-icon-home:before { content: '🏠'; }
+.t-icon-user:before { content: '👤'; }
+.t-icon-heart:before { content: '❤️'; }
+.t-icon-thumb-up:before { content: '👍'; }
+.t-icon-chat:before { content: '💬'; }
+.t-icon-image:before { content: '🖼️'; }
+.t-icon-mobile:before { content: '📱'; }
+.t-icon-logo-wechat:before { content: '💬'; }
+.t-icon-setting:before { content: '⚙️'; }
+.t-icon-lock-on:before { content: '🔒'; }
+.t-icon-help-circle:before { content: '❓'; }
+.t-icon-notification:before { content: '🔔'; }
+.t-icon-share:before { content: '📤'; }
+.t-icon-time:before { content: '⏰'; }
+.t-icon-bookmark:before { content: '🔖'; }
+.t-icon-send:before { content: '📤'; }
+.t-icon-check-circle-filled:before { content: '✅'; }
+
 .container {
   height: 100%;
   display: flex;
@@ -8,3 +61,9 @@
   padding: 200rpx 0;
   box-sizing: border-box;
 } 
+
+/* 全局样式重置 */
+page {
+  background-color: #f3f3f3;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', SimSun, sans-serif;
+}

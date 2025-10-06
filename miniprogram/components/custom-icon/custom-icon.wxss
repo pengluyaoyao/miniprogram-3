@@ -1,0 +1,12 @@
+.custom-icon {
+  display: inline-block;
+  text-align: center;
+  line-height: 1;
+  font-style: normal;
+}
+
+.custom-icon text {
+  font-size: inherit;
+  color: inherit;
+}
+

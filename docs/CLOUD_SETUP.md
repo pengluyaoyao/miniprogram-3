@@ -10,11 +10,9 @@
 
 #### 用户相关云函数
 - `userLogin` - 微信登录/注册
-- `phoneLogin` - 手机号登录
-- `getPhoneNumber` - 获取用户手机号
-- `sendSmsCode` - 发送短信验证码
 - `updateUserInfo` - 更新用户信息
 - `updateUserStats` - 更新用户统计信息
+- `deleteOldAvatar` - 删除旧头像文件
 
 #### 系统云函数
 - `initDatabase` - 初始化数据库集合
@@ -46,16 +44,6 @@
 }
 ```
 
-#### 短信验证码集合 (sms_codes)
-```javascript
-{
-  _id: "验证码ID",
-  phone: "手机号",
-  code: "验证码",
-  createTime: "创建时间",
-  expireTime: "过期时间"
-}
-```
 
 ### 4. 部署步骤
 

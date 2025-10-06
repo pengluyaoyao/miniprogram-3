@@ -1,0 +1,6 @@
+/* components/markdown-view/markdown-view.wxss */
+.markdown-content {
+  word-wrap: break-word;
+  word-break: break-all;
+}
+

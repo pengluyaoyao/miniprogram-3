@@ -54,5 +54,6 @@
   },
   "appid": "wxcb944549c512c28c",
   "cloudfunctionRoot": "cloudfunctions/",
-  "cloudbaseRoot": "cloudbase/"
+  "cloudbaseRoot": "cloudbase/",
+  "cloudfunctionTemplateRoot": "cloudfunctionTemplate/"
 }

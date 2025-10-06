@@ -24,7 +24,13 @@
   align-items: center;
 }
 
-/* 上传组件 */
+/* 楼层输入 */
+.floor-inputs {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
 .upload-tip {
   font-size: 24rpx;
   color: #666666;
@@ -87,7 +93,100 @@
 
 .result-content {
   font-size: 26rpx;
+  line-height: 1.8;
+  color: #333333;
+}
+
+.content-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 新增样式 */
+.overall-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  padding: 32rpx;
+  background: linear-gradient(135deg, #0052d9 0%, #266fe8 100%);
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.score-title {
+  font-size: 28rpx;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.score-value {
+  font-size: 64rpx;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.score-unit {
+  font-size: 28rpx;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.result-score {
+  font-size: 24rpx;
+  color: #0052d9;
+  font-weight: 600;
+}
+
+.result-suggestions {
+  margin-top: 16rpx;
+}
+
+.suggestions-title {
+  font-size: 24rpx;
+  color: #666666;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.suggestion-item {
+  font-size: 24rpx;
+  color: #666666;
   line-height: 1.5;
+  margin-bottom: 4rpx;
+}
+
+.analysis-summary {
+  margin-top: 24rpx;
+  padding: 24rpx;
+  background-color: #f8f9fa;
+  border-radius: 12rpx;
+  border: 1rpx solid #e9ecef;
+}
+
+.summary-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 16rpx;
+}
+
+.summary-content {
+  font-size: 26rpx;
+  line-height: 1.8;
+  color: #333333;
+}
+
+.summary-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* 操作按钮 */

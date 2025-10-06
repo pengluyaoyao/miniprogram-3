@@ -1,8 +1,15 @@
 // 分析户型页面逻辑
+import type { HouseInfo, AnalysisResult } from '../../services/aiService';
+import { aiService } from '../../services/aiService';
+
 interface FormData {
+  houseDescription: string;
   birthInfo: string;
   orientation: string;
   area: string;
+  rooms: string;
+  floor: string;
+  totalFloors: string;
 }
 
 interface UploadFile {
@@ -17,23 +24,18 @@ interface FocusOption {
   selected: boolean;
 }
 
-interface AnalysisResult {
-  type: string;
-  title: string;
-  content: string;
-  color: string;
-  bgColor: string;
-  titleColor: string;
-  contentColor: string;
-}
 
 Page({
   data: {
     uploadFiles: [] as UploadFile[],
     formData: {
+      houseDescription: '',
       birthInfo: '',
       orientation: '',
-      area: ''
+      area: '',
+      rooms: '',
+      floor: '',
+      totalFloors: ''
     } as FormData,
     focusOptions: [
       { value: 'wealth', label: '财位', selected: true },
@@ -44,51 +46,17 @@ Page({
       { value: 'balcony', label: '阳台', selected: false },
       { value: 'entrance', label: '玄关', selected: false }
     ] as FocusOption[],
-    analysisResult: null as AnalysisResult[] | null,
+    analysisResult: null as AnalysisResult | null,
     isAnalyzing: false,
-    canPublish: false
+    canPublish: false,
+    currentAnalysisId: '',
+    overallScore: 0
   },
 
   onLoad() {
     // 页面加载时的初始化
   },
 
-  // 上传文件变化
-  onUploadChange(e: any) {
-    console.log('上传文件变化:', e.detail);
-    this.setData({
-      uploadFiles: e.detail.files
-    });
-    this.checkCanPublish();
-  },
-
-  // 移除上传文件
-  onUploadRemove(e: any) {
-    console.log('移除文件:', e.detail);
-    const files = this.data.uploadFiles.filter((_, index) => index !== e.detail.index);
-    this.setData({
-      uploadFiles: files
-    });
-    this.checkCanPublish();
-  },
-
-  // 上传成功
-  onUploadSuccess(e: any) {
-    console.log('上传成功:', e.detail);
-    wx.showToast({
-      title: '上传成功',
-      icon: 'success'
-    });
-  },
-
-  // 上传失败
-  onUploadFail(e: any) {
-    console.log('上传失败:', e.detail);
-    wx.showToast({
-      title: '上传失败',
-      icon: 'none'
-    });
-  },
 
   // 表单数据变化
   onFormChange(e: any) {
@@ -114,136 +82,105 @@ Page({
     this.checkCanPublish();
   },
 
-  // 检查是否可以发布
+  // 检查是否可以开始分析
   checkCanPublish() {
-    const { uploadFiles, formData } = this.data;
-    const hasImage = uploadFiles.length > 0;
-    const hasBasicInfo = formData.birthInfo && formData.orientation && formData.area;
+    // 简化条件，只要有户型描述就可以开始分析
+    const { formData } = this.data;
+    const hasDescription = formData.houseDescription && formData.houseDescription.trim().length > 0;
     
     this.setData({
-      canPublish: hasImage && hasBasicInfo
+      canPublish: !!hasDescription
     });
   },
 
   // 开始分析
   async startAnalysis() {
-    this.setData({ isAnalyzing: true });
-
-    try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      // 模拟分析结果
-      const mockResult: AnalysisResult[] = [
-        {
-          type: 'overall',
-          title: '整体评价',
-          content: '该户型整体布局合理，采光通风良好，符合现代居住需求。',
-          color: '#00a870',
-          bgColor: '#f3fff3',
-          titleColor: '#00a870',
-          contentColor: '#00a870'
-        },
-        {
-          type: 'wealth',
-          title: '财位建议',
-          content: '客厅东南角为财位，建议放置绿色植物或招财摆件，避免放置杂物。',
-          color: '#e37318',
-          bgColor: '#fff7e6',
-          titleColor: '#e37318',
-          contentColor: '#e37318'
-        },
-        {
-          type: 'kitchen',
-          title: '厨房布局',
-          content: '厨房位置合适，建议灶台避免正对水槽，保持水火平衡。',
-          color: '#0052d9',
-          bgColor: '#e6f3ff',
-          titleColor: '#0052d9',
-          contentColor: '#0052d9'
-        },
-        {
-          type: 'warning',
-          title: '注意事项',
-          content: '主卧床头建议朝向东南，避免正对卫生间门。',
-          color: '#d54941',
-          bgColor: '#fff1f0',
-          titleColor: '#d54941',
-          contentColor: '#d54941'
-        }
-      ];
-
-      this.setData({
-        analysisResult: mockResult
-      });
-
-      wx.showToast({
-        title: '分析完成',
-        icon: 'success'
-      });
-
-    } catch (error) {
-      console.error('分析失败:', error);
-      wx.showToast({
-        title: '分析失败',
-        icon: 'none'
-      });
-    } finally {
-      this.setData({ isAnalyzing: false });
-    }
-  },
-
-  // 发布按钮点击
-  onPublishTap() {
     if (!this.data.canPublish) {
       wx.showToast({
-        title: '请完善信息',
+        title: '请先输入户型描述',
         icon: 'none'
       });
       return;
     }
 
-    if (!this.data.analysisResult) {
-      // 如果没有分析结果，先进行分析
-      this.startAnalysis();
-    } else {
-      // 已有分析结果，直接发布
-      this.publishAnalysis();
-    }
-  },
+    this.setData({ isAnalyzing: true });
 
-  // 发布分析结果
-  async publishAnalysis() {
+    // 显示加载提示（异步模式）
+    wx.showLoading({
+      title: '提交分析任务...',
+      mask: true
+    });
+
     try {
-      // 模拟发布API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // 构建户型信息
+      const { formData, focusOptions } = this.data;
+      const selectedFocus = focusOptions
+        .filter(option => option.selected)
+        .map(option => option.label);
 
-      wx.showToast({
-        title: '发布成功',
-        icon: 'success'
+      const houseInfo: HouseInfo = {
+        area: formData.area || '未填写',
+        rooms: formData.rooms || '未填写',
+        orientation: formData.orientation || '未填写',
+        floor: formData.floor || '未填写',
+        totalFloors: formData.totalFloors || '未填写',
+        birthday: formData.birthInfo || '未填写',
+        focusAspects: selectedFocus.length > 0 ? selectedFocus : ['综合分析']
+      };
+
+      // 使用户型描述作为"图片URL"传递给后端
+      const houseDescription = formData.houseDescription;
+
+      console.log('【异步模式】准备调用AI分析，参数:', { houseDescription, houseInfo });
+
+      // 更新加载提示
+      wx.showLoading({
+        title: 'AI分析中，请稍候...',
+        mask: true
       });
 
-      // 跳转到首页
-      setTimeout(() => {
-        wx.switchTab({
-          url: '/pages/home/home'
+      // 调用AI分析（异步模式，会自动轮询）
+      const result = await aiService.createAnalysis(houseDescription, houseInfo);
+
+      console.log('AI分析结果:', result);
+
+      if (result.success && result.result) {
+        this.setData({
+          analysisResult: result.result,
+          currentAnalysisId: result.analysisId || '',
+          overallScore: result.result.overallScore || 0,
+          isAnalyzing: false
         });
-      }, 1500);
+
+        // 隐藏加载提示
+        wx.hideLoading();
+        
+        wx.showToast({
+          title: '分析完成',
+          icon: 'success',
+          duration: 2000
+        });
+      } else {
+        throw new Error(result.message || '分析失败');
+      }
 
     } catch (error) {
-      console.error('发布失败:', error);
-      wx.showToast({
-        title: '发布失败',
-        icon: 'none'
+      console.error('分析失败:', error);
+      console.error('错误详情:', JSON.stringify(error, null, 2));
+      this.setData({ isAnalyzing: false });
+      
+      // 隐藏加载提示
+      wx.hideLoading();
+      
+      // 显示错误信息
+      const errorMsg = (error as Error).message || '分析失败，请重试';
+      wx.showModal({
+        title: '分析失败',
+        content: errorMsg,
+        showCancel: false,
+        confirmText: '我知道了'
       });
     }
   },
 
-  // 重新分析按钮点击
-  onReAnalyzeTap() {
-    this.setData({
-      analysisResult: null
-    });
-    this.startAnalysis();
-  }
 });

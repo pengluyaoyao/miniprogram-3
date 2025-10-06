@@ -1,19 +1,21 @@
 <!--分析户型页面-->
 <view class="analysis-container">
-  <!-- 上传户型图 -->
+  <!-- 户型描述 -->
   <view class="section">
-    <view class="section-title">上传户型图</view>
-    <t-upload
-      files="{{uploadFiles}}"
-      bind:change="onUploadChange"
-      bind:remove="onUploadRemove"
-      bind:success="onUploadSuccess"
-      bind:fail="onUploadFail"
-      max="3"
-      theme="image"
-      size="large"
-    />
-    <view class="upload-tip">支持JPG、PNG格式，最多上传3张</view>
+    <view class="section-title">户型描述</view>
+    <view class="form-item">
+      <view class="form-label">户型详情</view>
+      <t-textarea
+        placeholder="请详细描述您的户型布局，如：进门是玄关，左边是客厅，右边是餐厅，主卧朝南，次卧朝北，厨房在西边，卫生间在北边等..."
+        value="{{formData.houseDescription}}"
+        bind:change="onFormChange"
+        data-field="houseDescription"
+        maxlength="500"
+        indicator
+        autosize
+      />
+    </view>
+    <view class="upload-tip">请尽可能详细地描述户型布局，有助于获得更准确的分析结果</view>
   </view>
 
   <!-- 基本信息 -->
@@ -53,6 +55,41 @@
         type="number"
       />
     </view>
+
+    <!-- 房间数 -->
+    <view class="form-item">
+      <view class="form-label">房间数</view>
+      <t-input
+        placeholder="请输入房间数，如：3室2厅"
+        value="{{formData.rooms}}"
+        bind:change="onFormChange"
+        data-field="rooms"
+      />
+    </view>
+
+    <!-- 楼层信息 -->
+    <view class="form-item">
+      <view class="form-label">楼层信息</view>
+      <view class="floor-inputs">
+        <t-input
+          placeholder="当前楼层"
+          value="{{formData.floor}}"
+          bind:change="onFormChange"
+          data-field="floor"
+          type="number"
+          style="flex: 1; margin-right: 16rpx;"
+        />
+        <text style="line-height: 80rpx;">/</text>
+        <t-input
+          placeholder="总楼层"
+          value="{{formData.totalFloors}}"
+          bind:change="onFormChange"
+          data-field="totalFloors"
+          type="number"
+          style="flex: 1; margin-left: 16rpx;"
+        />
+      </view>
+    </view>
   </view>
 
   <!-- 关注方面 -->
@@ -82,16 +119,43 @@
         <text class="status-text">分析完成</text>
       </view>
     </view>
-    
+
+    <!-- 总体评分 -->
+    <view class="overall-score">
+      <view class="score-title">综合评分</view>
+      <view class="score-value">{{overallScore}}</view>
+      <view class="score-unit">分</view>
+    </view>
+
+    <!-- 分析详情 -->
     <view class="analysis-results">
       <view 
         class="result-item" 
-        wx:for="{{analysisResult}}" 
+        wx:for="{{analysisResult.aspects}}" 
         wx:key="type"
-        style="border-left-color: {{item.color}}; background-color: {{item.bgColor}}"
+        style="border-left-color: {{item.color}}"
       >
-        <view class="result-title" style="color: {{item.titleColor}}">{{item.title}}</view>
-        <view class="result-content" style="color: {{item.contentColor}}">{{item.content}}</view>
+        <view class="result-header">
+          <view class="result-title">{{item.title}}</view>
+          <view class="result-score">{{item.score}}分</view>
+        </view>
+        <view class="result-content">
+          <text class="content-text">{{item.content}}</text>
+        </view>
+        <view class="result-suggestions" wx:if="{{item.suggestions && item.suggestions.length > 0}}">
+          <view class="suggestions-title">改善建议：</view>
+          <view class="suggestion-item" wx:for="{{item.suggestions}}" wx:for-item="suggestion" wx:key="*this">
+            • {{suggestion}}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 总结 -->
+    <view class="analysis-summary" wx:if="{{analysisResult.summary}}">
+      <view class="summary-title">分析总结</view>
+      <view class="summary-content">
+        <text class="summary-text">{{analysisResult.summary}}</text>
       </view>
     </view>
   </view>
@@ -102,20 +166,11 @@
       theme="primary"
       size="large"
       block
-      bind:tap="onPublishTap"
-      disabled="{{!canPublish}}"
+      bind:tap="startAnalysis"
+      disabled="{{isAnalyzing}}"
+      loading="{{isAnalyzing}}"
     >
-      发布大家帮我看
-    </t-button>
-    
-    <t-button
-      theme="default"
-      size="large"
-      block
-      bind:tap="onReAnalyzeTap"
-      style="margin-top: 24rpx;"
-    >
-      重新分析
+      {{isAnalyzing ? '分析中...' : '开始分析'}}
     </t-button>
   </view>
 

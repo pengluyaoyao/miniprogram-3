@@ -7,24 +7,6 @@
       "runtime": "Nodejs18.15"
     },
     {
-      "name": "phoneLogin",
-      "timeout": 20,
-      "envVariables": {},
-      "runtime": "Nodejs18.15"
-    },
-    {
-      "name": "getPhoneNumber",
-      "timeout": 20,
-      "envVariables": {},
-      "runtime": "Nodejs18.15"
-    },
-    {
-      "name": "sendSmsCode",
-      "timeout": 20,
-      "envVariables": {},
-      "runtime": "Nodejs18.15"
-    },
-    {
       "name": "updateUserInfo",
       "timeout": 20,
       "envVariables": {},
@@ -41,6 +23,22 @@
       "timeout": 20,
       "envVariables": {},
       "runtime": "Nodejs18.15"
+    },
+    {
+      "name": "initDatabase",
+      "timeout": 20,
+      "envVariables": {},
+      "runtime": "Nodejs18.15"
+    },
+    {
+      "name": "aiAnalysis",
+      "timeout": 120,
+      "envVariables": {
+        "DASHSCOPE_API_KEY": "",
+        "APP_ID": ""
+      },
+      "runtime": "Nodejs18.15",
+      "memorySize": 512
     }
   ]
 }

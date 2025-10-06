@@ -1,0 +1,22 @@
+<view class="custom-icon" style="font-size: {{size}}; color: {{color}};">
+  <text wx:if="{{name === 'edit'}}">✏️</text>
+  <text wx:elif="{{name === 'home'}}">🏠</text>
+  <text wx:elif="{{name === 'user'}}">👤</text>
+  <text wx:elif="{{name === 'heart'}}">❤️</text>
+  <text wx:elif="{{name === 'thumb-up'}}">👍</text>
+  <text wx:elif="{{name === 'chat'}}">💬</text>
+  <text wx:elif="{{name === 'image'}}">🖼️</text>
+  <text wx:elif="{{name === 'mobile'}}">📱</text>
+  <text wx:elif="{{name === 'logo-wechat'}}">💬</text>
+  <text wx:elif="{{name === 'setting'}}">⚙️</text>
+  <text wx:elif="{{name === 'lock-on'}}">🔒</text>
+  <text wx:elif="{{name === 'help-circle'}}">❓</text>
+  <text wx:elif="{{name === 'notification'}}">🔔</text>
+  <text wx:elif="{{name === 'share'}}">📤</text>
+  <text wx:elif="{{name === 'time'}}">⏰</text>
+  <text wx:elif="{{name === 'bookmark'}}">🔖</text>
+  <text wx:elif="{{name === 'send'}}">📤</text>
+  <text wx:elif="{{name === 'check-circle-filled'}}">✅</text>
+  <text wx:else>●</text>
+</view>
+

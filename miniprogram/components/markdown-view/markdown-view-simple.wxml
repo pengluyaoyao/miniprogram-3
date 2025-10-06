@@ -1,0 +1,5 @@
+<!-- 简单版本：直接显示文本 -->
+<view class="markdown-simple">
+  <text>{{content}}</text>
+</view>
+

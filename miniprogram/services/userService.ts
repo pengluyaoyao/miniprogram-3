@@ -74,42 +74,6 @@ class UserService {
     }
   }
 
-  // 手机号登录
-  async phoneLogin(phone: string, code: string): Promise<LoginResult> {
-    try {
-      const result = await wx.cloud.callFunction({
-        name: 'phoneLogin',
-        data: {
-          phone: phone,
-          code: code
-        }
-      });
-
-      if (result.result && result.result.success) {
-        const userInfo = result.result.userInfo as UserInfo;
-        
-        // 保存用户信息到本地
-        wx.setStorageSync('userInfo', userInfo);
-        wx.setStorageSync('isLoggedIn', true);
-
-        return {
-          success: true,
-          userInfo: userInfo
-        };
-      } else {
-        return {
-          success: false,
-          message: result.result?.message || '登录失败'
-        };
-      }
-    } catch (error) {
-      console.error('手机号登录失败:', error);
-      return {
-        success: false,
-        message: '登录失败，请重试'
-      };
-    }
-  }
 
   // 获取用户信息
   getUserProfile(): Promise<any> {
@@ -126,43 +90,6 @@ class UserService {
     });
   }
 
-  // 获取手机号
-  async getPhoneNumber(e: any): Promise<string | null> {
-    try {
-      const result = await wx.cloud.callFunction({
-        name: 'getPhoneNumber',
-        data: {
-          code: e.detail.code
-        }
-      });
-
-      if (result.result && result.result.success) {
-        return result.result.phoneNumber;
-      } else {
-        throw new Error(result.result?.message || '获取手机号失败');
-      }
-    } catch (error) {
-      console.error('获取手机号失败:', error);
-      return null;
-    }
-  }
-
-  // 发送短信验证码
-  async sendSmsCode(phone: string): Promise<boolean> {
-    try {
-      const result = await wx.cloud.callFunction({
-        name: 'sendSmsCode',
-        data: {
-          phone: phone
-        }
-      });
-
-      return result.result && result.result.success;
-    } catch (error) {
-      console.error('发送短信验证码失败:', error);
-      return false;
-    }
-  }
 
   // 更新用户信息
   async updateUserInfo(userInfo: Partial<UserInfo>): Promise<boolean> {
