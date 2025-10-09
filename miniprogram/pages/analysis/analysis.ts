@@ -3,7 +3,7 @@ import type { HouseInfo, AnalysisResult } from '../../services/aiService';
 import { aiService } from '../../services/aiService';
 
 interface FormData {
-  houseDescription: string;
+  imageUrl: string;  // 改为存储图片URL
   birthInfo: string;
   orientation: string;
   area: string;
@@ -29,7 +29,7 @@ Page({
   data: {
     uploadFiles: [] as UploadFile[],
     formData: {
-      houseDescription: '',
+      imageUrl: '',  // 改为存储图片URL
       birthInfo: '',
       orientation: '',
       area: '',
@@ -50,13 +50,100 @@ Page({
     isAnalyzing: false,
     canPublish: false,
     currentAnalysisId: '',
-    overallScore: 0
+    overallScore: 0,
+    gridConfig: {
+      column: 3,
+      width: 210,
+      height: 210
+    }
   },
 
   onLoad() {
     // 页面加载时的初始化
+    wx.cloud.init();
   },
 
+  // 图片上传成功
+  async onUploadSuccess(e: any) {
+    const { files } = e.detail;
+    const tempFile = files[0];
+    
+    wx.showLoading({
+      title: '上传中...',
+      mask: true
+    });
+
+    try {
+      // 获取临时文件路径
+      const tempFilePath = tempFile.url;
+      
+      // 生成云存储文件名
+      const cloudPath = `house_images/${Date.now()}-${Math.random().toString(36).slice(2)}.${tempFile.type || 'jpg'}`;
+      
+      console.log('开始上传到云存储:', cloudPath);
+      
+      // 上传到云存储
+      const uploadResult = await wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: tempFilePath
+      });
+
+      console.log('云存储上传成功:', uploadResult);
+
+      // 获取文件的访问URL
+      const fileID = uploadResult.fileID;
+      const tempFileURLs = await wx.cloud.getTempFileURL({
+        fileList: [fileID]
+      });
+
+      const imageUrl = tempFileURLs.fileList[0].tempFileURL;
+      console.log('图片URL:', imageUrl);
+
+      // 更新状态
+      this.setData({
+        'formData.imageUrl': imageUrl,
+        uploadFiles: [{
+          url: imageUrl,
+          name: tempFile.name || 'house-image',
+          status: 'done'
+        }]
+      });
+
+      wx.hideLoading();
+      wx.showToast({
+        title: '上传成功',
+        icon: 'success'
+      });
+
+      this.checkCanPublish();
+
+    } catch (error) {
+      console.error('上传失败:', error);
+      wx.hideLoading();
+      wx.showToast({
+        title: '上传失败，请重试',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 图片上传失败
+  onUploadFail(e: any) {
+    console.error('上传失败:', e);
+    wx.showToast({
+      title: '上传失败，请重试',
+      icon: 'none'
+    });
+  },
+
+  // 移除图片
+  onUploadRemove() {
+    this.setData({
+      'formData.imageUrl': '',
+      uploadFiles: []
+    });
+    this.checkCanPublish();
+  },
 
   // 表单数据变化
   onFormChange(e: any) {
@@ -84,12 +171,12 @@ Page({
 
   // 检查是否可以开始分析
   checkCanPublish() {
-    // 简化条件，只要有户型描述就可以开始分析
+    // 简化条件，只要有图片就可以开始分析
     const { formData } = this.data;
-    const hasDescription = formData.houseDescription && formData.houseDescription.trim().length > 0;
+    const hasImage = formData.imageUrl && formData.imageUrl.trim().length > 0;
     
     this.setData({
-      canPublish: !!hasDescription
+      canPublish: !!hasImage
     });
   },
 
@@ -97,7 +184,7 @@ Page({
   async startAnalysis() {
     if (!this.data.canPublish) {
       wx.showToast({
-        title: '请先输入户型描述',
+        title: '请先上传户型图',
         icon: 'none'
       });
       return;
@@ -128,10 +215,10 @@ Page({
         focusAspects: selectedFocus.length > 0 ? selectedFocus : ['综合分析']
       };
 
-      // 使用户型描述作为"图片URL"传递给后端
-      const houseDescription = formData.houseDescription;
+      // 使用图片URL作为imageURL传递给后端
+      const imageUrl = formData.imageUrl;
 
-      console.log('【异步模式】准备调用AI分析，参数:', { houseDescription, houseInfo });
+      console.log('【异步模式】准备调用AI分析，参数:', { imageUrl, houseInfo });
 
       // 更新加载提示
       wx.showLoading({
@@ -140,7 +227,7 @@ Page({
       });
 
       // 调用AI分析（异步模式，会自动轮询）
-      const result = await aiService.createAnalysis(houseDescription, houseInfo);
+      const result = await aiService.createAnalysis(imageUrl, houseInfo);
 
       console.log('AI分析结果:', result);
 

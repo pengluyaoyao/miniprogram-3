@@ -1,21 +1,22 @@
 <!--分析户型页面-->
 <view class="analysis-container">
-  <!-- 户型描述 -->
+  <!-- 户型图片上传 -->
   <view class="section">
-    <view class="section-title">户型描述</view>
+    <view class="section-title">户型图片</view>
     <view class="form-item">
-      <view class="form-label">户型详情</view>
-      <t-textarea
-        placeholder="请详细描述您的户型布局，如：进门是玄关，左边是客厅，右边是餐厅，主卧朝南，次卧朝北，厨房在西边，卫生间在北边等..."
-        value="{{formData.houseDescription}}"
-        bind:change="onFormChange"
-        data-field="houseDescription"
-        maxlength="500"
-        indicator
-        autosize
+      <view class="form-label">上传户型图</view>
+      <t-upload
+        mediaType="{{['image']}}"
+        files="{{uploadFiles}}"
+        bind:success="onUploadSuccess"
+        bind:remove="onUploadRemove"
+        bind:fail="onUploadFail"
+        max="1"
+        gridConfig="{{gridConfig}}"
+        size-limit="{{10 * 1024 * 1024}}"
       />
     </view>
-    <view class="upload-tip">请尽可能详细地描述户型布局，有助于获得更准确的分析结果</view>
+    <view class="upload-tip">请上传户型图，支持 JPG、PNG 格式，最大 10MB</view>
   </view>
 
   <!-- 基本信息 -->

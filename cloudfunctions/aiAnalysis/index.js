@@ -20,6 +20,8 @@ exports.main = async (event, context) => {
         return await createAnalysisAsync(params);  // 改为异步模式
       case 'getAnalysisResult':
         return await getAnalysisResult(params);
+      case 'pollPendingTasks':
+        return await pollPendingTasks(params);  // 轮询待处理任务
       default:
         console.error('未知的操作类型:', name);
         return {
@@ -100,7 +102,7 @@ async function createAnalysisAsync(params) {
   }
 }
 
-// 后台处理分析任务
+// 后台处理分析任务（调用百炼API并处理结果）
 async function processAnalysisInBackground(taskId, params) {
   console.log('后台处理任务:', taskId);
   
@@ -113,42 +115,175 @@ async function processAnalysisInBackground(taskId, params) {
       }
     });
     
-    // 调用实际的分析函数
-    const result = await createAnalysis(params);
+    // 调用百炼API（同步调用，在后台执行）
+    const result = await submitBailianTask(params);
     
-    if (result.success) {
+    if (result && result.type === 'sync' && result.data) {
+      // 处理同步返回的结果
+      const apiResponse = result.data;
+      
+      // 提取分析结果
+      let analysisResult = null;
+      
+      if (apiResponse.output && apiResponse.output.text) {
+        analysisResult = apiResponse.output.text;
+      } else if (apiResponse.output) {
+        analysisResult = apiResponse.output;
+      } else {
+        throw new Error('百炼API返回格式错误');
+      }
+      
+      console.log('分析结果（前200字）:', String(analysisResult).substring(0, 200));
+      
+      // 解析结果
+      const parsedResult = parseAnalysisResult(analysisResult);
+      
       // 更新为完成状态
       await db.collection('house_analysis').doc(taskId).update({
         data: {
           status: 'completed',
-          analysisResult: result.result,
-          rawResult: result.rawResult || '',
+          analysisResult: parsedResult,
+          rawResult: analysisResult,
           updateTime: new Date()
         }
       });
-      console.log('任务完成:', taskId);
+      
+      console.log('✅ 分析完成:', taskId);
     } else {
-      // 更新为失败状态
-      await db.collection('house_analysis').doc(taskId).update({
-        data: {
-          status: 'failed',
-          error: result.message,
-          updateTime: new Date()
-        }
-      });
-      console.log('任务失败:', taskId);
+      throw new Error('百炼API返回数据格式错误');
     }
     
   } catch (error) {
     console.error('后台处理出错:', error);
+    console.error('错误详情:', error.response?.data || error.message);
+    
     // 更新为失败状态
     await db.collection('house_analysis').doc(taskId).update({
       data: {
         status: 'failed',
-        error: error.message,
+        error: error.message || '分析失败',
         updateTime: new Date()
       }
     }).catch(err => console.error('更新失败状态出错:', err));
+  }
+}
+
+// 调用百炼API进行分析（同步调用，但在后台异步执行）
+async function submitBailianTask(params) {
+  const { imageUrl: houseDescription, houseInfo } = params;
+  
+  try {
+    const apiKey = process.env.DASHSCOPE_API_KEY;
+    const appId = 'c0cd2dd09f6f4dc7b40a12bf863a6614';
+    
+    const url = `https://dashscope.aliyuncs.com/api/v1/apps/${appId}/completion`;
+    
+    // 构建请求数据（参考 scratch_4.py）
+    const data = {
+      input: {
+        prompt: houseDescription,  // 图片URL作为prompt
+        biz_params: {
+          imageURL: houseDescription,  // 也作为biz_params传递
+          area: houseInfo.area || '未填写',
+          rooms: houseInfo.rooms || '未填写',
+          directions: houseInfo.orientation || '未填写',
+          floor: houseInfo.floor || '未填写',
+          birth: houseInfo.birthday || '未填写',
+          focus: Array.isArray(houseInfo.focusAspects) ? houseInfo.focusAspects.join('、') : '综合分析'
+        }
+      },
+      parameters: {
+        incremental_output: false  // 非流式输出
+      }
+    };
+    
+    console.log('调用百炼API，URL:', url);
+    console.log('请求数据:', JSON.stringify(data, null, 2));
+    
+    const startTime = Date.now();
+    
+    // 同步调用百炼API（不使用异步头）
+    const response = await axios.post(url, data, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+        // 移除 X-DashScope-Async 头，使用同步模式
+      },
+      timeout: 300000  // 5分钟超时，给百炼足够的处理时间
+    });
+    
+    const duration = (Date.now() - startTime) / 1000;
+    console.log(`百炼API耗时: ${duration.toFixed(2)} 秒`);
+    console.log('百炼API响应:', JSON.stringify(response.data, null, 2));
+    
+    // 返回特殊标记，表示同步完成
+    return {
+      type: 'sync',
+      data: response.data
+    };
+    
+  } catch (error) {
+    console.error('调用百炼API失败:', error);
+    console.error('错误详情:', error.response?.data || error.message);
+    throw error;
+  }
+}
+
+// 批量处理待处理的任务（供定时触发器调用，可选）
+// 当前实现：同步模式不需要额外的轮询，后台处理函数已经自动完成
+async function pollPendingTasks(params) {
+  console.log('查询待处理任务状态');
+  
+  try {
+    // 查询所有processing状态的记录
+    const result = await db.collection('house_analysis')
+      .where({
+        status: 'processing'
+      })
+      .limit(20)
+      .get();
+    
+    console.log('找到待处理任务数:', result.data.length);
+    
+    // 检查是否有超时的任务（超过10分钟仍在processing状态）
+    const now = new Date();
+    const tasks = result.data;
+    let timeoutCount = 0;
+    
+    for (const task of tasks) {
+      const updateTime = task.updateTime;
+      if (updateTime) {
+        const diffMs = now - updateTime;
+        const diffMin = diffMs / 1000 / 60;
+        
+        // 如果超过10分钟，标记为超时失败
+        if (diffMin > 10) {
+          await db.collection('house_analysis').doc(task._id).update({
+            data: {
+              status: 'failed',
+              error: '处理超时',
+              updateTime: new Date()
+            }
+          });
+          timeoutCount++;
+          console.log('⏱️ 任务超时:', task._id);
+        }
+      }
+    }
+    
+    return {
+      success: true,
+      message: `检查完成，超时任务: ${timeoutCount}`,
+      processingCount: tasks.length,
+      timeoutCount
+    };
+    
+  } catch (error) {
+    console.error('批量处理任务失败:', error);
+    return {
+      success: false,
+      message: error.message
+    };
   }
 }
 
@@ -293,7 +428,7 @@ async function createAnalysis(params) {
   }
 }
 
-// 获取分析结果（支持异步查询）
+// 获取分析结果（查询数据库状态）
 async function getAnalysisResult(params) {
   const { analysisId, taskId, userId } = params;
   const queryId = taskId || analysisId;  // 支持两种ID格式
