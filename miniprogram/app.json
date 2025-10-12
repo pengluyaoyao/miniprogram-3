@@ -1,6 +1,5 @@
 {
   "pages": [
-    "pages/home/home",
     "pages/analysis/analysis",
     "pages/detail/detail",
     "pages/profile/profile",
@@ -17,12 +16,6 @@
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [
-      {
-        "pagePath": "pages/home/home",
-        "iconPath": "assets/icons/home.png",
-        "selectedIconPath": "assets/icons/home-active.png",
-        "text": "首页"
-      },
       {
         "pagePath": "pages/analysis/analysis",
         "iconPath": "assets/icons/analysis.png",
