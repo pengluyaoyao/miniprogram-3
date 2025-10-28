@@ -230,14 +230,23 @@ Page({
       const result = await aiService.createAnalysis(imageUrl, houseInfo);
 
       console.log('AI分析结果:', result);
+      console.log('result.success:', result.success);
+      console.log('result.result:', JSON.stringify(result.result, null, 2));
 
       if (result.success && result.result) {
+        console.log('准备显示结果...');
+        console.log('analysisResult:', result.result);
+        console.log('summary:', result.result.summary);
+        console.log('aspects:', result.result.aspects);
+        
         this.setData({
           analysisResult: result.result,
           currentAnalysisId: result.analysisId || '',
           overallScore: result.result.overallScore || 0,
           isAnalyzing: false
         });
+        
+        console.log('setData完成，当前analysisResult:', this.data.analysisResult);
 
         // 隐藏加载提示
         wx.hideLoading();
@@ -248,6 +257,7 @@ Page({
           duration: 2000
         });
       } else {
+        console.error('分析失败 - success:', result.success, ', result:', result.result);
         throw new Error(result.message || '分析失败');
       }
 

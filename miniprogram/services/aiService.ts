@@ -77,6 +77,23 @@ class AIService {
         const taskId = cloudResult.taskId;
         console.log('任务已创建，ID:', taskId);
 
+        // 立即触发任务处理（不等待完成）
+        console.log('→ 立即调用 processTask 开始处理...');
+        wx.cloud.callFunction({
+          name: 'aiAnalysis',
+          data: {
+            name: 'processTask',
+            taskId: taskId,
+            imageUrl: houseDescription,
+            houseInfo: houseInfo,
+            userId: userInfo._id
+          }
+        }).then(() => {
+          console.log('processTask 调用成功');
+        }).catch(err => {
+          console.error('processTask 调用失败:', err);
+        });
+
         // 开始轮询查询结果
         const finalResult = await this.pollAnalysisResult(taskId, userInfo._id);
         return finalResult;
