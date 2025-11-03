@@ -52,11 +52,21 @@ async function processTaskDirectly(params) {
   }
   
   try {
-    await processAnalysisInBackground(taskId, analysisParams);
+    // 🔧 关键修改：不使用await，让处理在后台异步执行
+    // 这样云函数可以立即返回，不会超时
+    processAnalysisInBackground(taskId, analysisParams)
+      .then(() => {
+        console.log('✅ 后台处理完成:', taskId);
+      })
+      .catch(error => {
+        console.error('❌ 后台处理失败:', taskId, error);
+      });
     
+    // 立即返回，不等待处理完成
+    console.log('processTask 已触发，立即返回');
     return {
       success: true,
-      message: '任务处理完成'
+      message: '任务已开始处理'
     };
   } catch (error) {
     console.error('processTaskDirectly 出错:', error);
@@ -88,7 +98,8 @@ async function createAnalysisAsync(params) {
     // 立即创建任务记录（状态为 pending）
     const taskRecord = {
       userId: userId,
-      houseDescription: houseDescription,
+      imageUrl: houseDescription,  // 户型图URL
+      houseDescription: houseDescription,  // 保持兼容性
       houseInfo: houseInfo,
       status: 'pending',
       createTime: new Date(),

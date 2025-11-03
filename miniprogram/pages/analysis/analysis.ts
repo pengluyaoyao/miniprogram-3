@@ -38,13 +38,13 @@ Page({
       totalFloors: ''
     } as FormData,
     focusOptions: [
-      { value: 'wealth', label: '财位', selected: true },
-      { value: 'bedroom', label: '主卧', selected: false },
-      { value: 'kitchen', label: '厨房', selected: true },
-      { value: 'living', label: '客厅', selected: false },
-      { value: 'bathroom', label: '卫生间', selected: false },
-      { value: 'balcony', label: '阳台', selected: false },
-      { value: 'entrance', label: '玄关', selected: false }
+      { value: 'wealth', label: '财运', selected: true },
+      { value: 'career', label: '事业', selected: false },
+      { value: 'love', label: '爱情', selected: true },
+      { value: 'marriage', label: '婚姻', selected: false },
+      { value: 'family', label: '家人', selected: false },
+      { value: 'health', label: '健康', selected: false },
+      { value: 'study', label: '学业', selected: false }
     ] as FocusOption[],
     analysisResult: null as AnalysisResult | null,
     isAnalyzing: false,
@@ -222,7 +222,7 @@ Page({
 
       // 更新加载提示
       wx.showLoading({
-        title: 'AI分析中，请稍候...',
+        title: '分析中，请稍候...',
         mask: true
       });
 

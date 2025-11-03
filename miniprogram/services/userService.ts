@@ -10,11 +10,6 @@ interface UserInfo {
   country?: string;
   phone?: string;
   stats: {
-    posts: number;
-    likes: number;
-    follows: number;
-    collections: number;
-    comments: number;
     analysis: number;
   };
   createTime?: Date;

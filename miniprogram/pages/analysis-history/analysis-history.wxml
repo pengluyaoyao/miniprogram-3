@@ -1,0 +1,79 @@
+<!--分析记录页面-->
+<view class="history-container">
+  <!-- 加载状态 -->
+  <view class="loading-wrapper" wx:if="{{loading}}">
+    <t-loading theme="spinner" size="48rpx" text="加载中..." />
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-wrapper" wx:if="{{!loading && isEmpty}}">
+    <t-empty 
+      icon="chart" 
+      description="暂无分析记录"
+    />
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="records-list" wx:if="{{!loading && !isEmpty}}">
+    <view 
+      class="record-item" 
+      wx:for="{{records}}" 
+      wx:key="_id"
+      bindtap="onRecordTap"
+      data-id="{{item._id}}"
+    >
+      <!-- 户型图 -->
+      <view class="record-image">
+        <t-image 
+          src="{{item.houseDescription || item.imageUrl}}" 
+          mode="aspectFill"
+          width="200rpx"
+          height="200rpx"
+          shape="round"
+          error="加载失败"
+        />
+      </view>
+
+      <!-- 记录信息 -->
+      <view class="record-info">
+        <!-- 户型信息 -->
+        <view class="house-info">
+          <text class="info-label">户型：</text>
+          <text class="info-value">{{item.houseInfo.rooms || '未填写'}}</text>
+          <text class="info-divider">|</text>
+          <text class="info-label">面积：</text>
+          <text class="info-value">{{item.houseInfo.area || '未填写'}}</text>
+        </view>
+
+        <!-- 分析结果摘要 -->
+        <view class="analysis-summary">
+          <text class="summary-text">{{item.analysisResult.summary}}</text>
+        </view>
+
+        <!-- 评分 -->
+        <view class="score-section" wx:if="{{item.analysisResult.overallScore}}">
+          <text class="score-label">综合评分：</text>
+          <text class="score-value">{{item.analysisResult.overallScore}}分</text>
+        </view>
+
+        <!-- 时间 -->
+        <view class="time-section">
+          <t-icon name="time" size="28rpx" color="#999" />
+          <text class="time-text">{{item.createTime}}</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="record-actions">
+        <view 
+          class="action-btn delete-btn" 
+          catchtap="onDeleteRecord"
+          data-id="{{item._id}}"
+        >
+          <t-icon name="delete" size="36rpx" color="#e34d59" />
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+

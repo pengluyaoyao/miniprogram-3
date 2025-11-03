@@ -21,7 +21,7 @@
 
   <!-- 基本信息 -->
   <view class="section">
-    <view class="section-title">基本信息</view>
+    <view class="section-title">基本信息(选填)</view>
     
     <!-- 生辰八字 -->
     <view class="form-item">
@@ -179,7 +179,7 @@
   <view class="analyzing-overlay" wx:if="{{isAnalyzing}}">
     <view class="analyzing-content">
       <t-loading size="60rpx" />
-      <text class="analyzing-text">AI正在分析中，请稍候...</text>
+      <text class="analyzing-text">正在分析中，请稍候...</text>
     </view>
   </view>
 </view>

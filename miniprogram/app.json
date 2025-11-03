@@ -3,7 +3,8 @@
     "pages/analysis/analysis",
     "pages/detail/detail",
     "pages/profile/profile",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/analysis-history/analysis-history"
   ],
   "window": {
     "navigationBarTextStyle": "black",

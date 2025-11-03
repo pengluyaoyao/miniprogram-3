@@ -63,11 +63,6 @@ Page({
             nickname: '游客用户',
             avatar: 'https://via.placeholder.com/160x160/ccc/ffffff?text=游客',
             stats: {
-              posts: 0,
-              likes: 0,
-              follows: 0,
-              collections: 0,
-              comments: 0,
               analysis: 0
             }
           };

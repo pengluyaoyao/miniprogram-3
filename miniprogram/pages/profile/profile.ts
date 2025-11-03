@@ -12,21 +12,10 @@ interface UserInfo {
   country?: string;
   phone?: string;
   stats: {
-    posts: number;
-    likes: number;
-    follows: number;
-    collections: number;
-    comments: number;
     analysis: number;
   };
   createTime?: Date;
   updateTime?: Date;
-}
-
-interface MessageCount {
-  system: number;
-  comments: number;
-  likes: number;
 }
 
 Page({
@@ -38,19 +27,9 @@ Page({
       nickname: '',
       avatar: '',
       stats: {
-        posts: 0,
-        likes: 0,
-        follows: 0,
-        collections: 0,
-        comments: 0,
         analysis: 0
       }
-    } as UserInfo,
-    messageCount: {
-      system: 0,
-      comments: 0,
-      likes: 0
-    } as MessageCount
+    } as UserInfo
   },
 
   onLoad() {
@@ -72,7 +51,6 @@ Page({
         isLoggedIn: true,
         userInfo: userInfo
       });
-      this.loadMessageCount();
     } else {
       this.setData({
         isLoggedIn: false
@@ -98,27 +76,6 @@ Page({
       console.error('刷新用户信息失败:', error);
       // 如果刷新失败，回退到原来的方法
       this.checkLoginStatus();
-    }
-  },
-
-  // 加载消息数量
-  async loadMessageCount() {
-    try {
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const mockMessageCount: MessageCount = {
-        system: 3,
-        comments: 0,
-        likes: 5
-      };
-
-      this.setData({
-        messageCount: mockMessageCount
-      });
-
-    } catch (error) {
-      console.error('加载消息数量失败:', error);
     }
   },
 
@@ -391,45 +348,6 @@ Page({
     });
   },
 
-  // 我的发布
-  onMyPostsTap() {
-    if (!this.data.isLoggedIn) {
-      this.onLoginTap();
-      return;
-    }
-
-    wx.showToast({
-      title: '我的发布',
-      icon: 'none'
-    });
-  },
-
-  // 我的收藏
-  onMyCollectionsTap() {
-    if (!this.data.isLoggedIn) {
-      this.onLoginTap();
-      return;
-    }
-
-    wx.showToast({
-      title: '我的收藏',
-      icon: 'none'
-    });
-  },
-
-  // 我的评论
-  onMyCommentsTap() {
-    if (!this.data.isLoggedIn) {
-      this.onLoginTap();
-      return;
-    }
-
-    wx.showToast({
-      title: '我的评论',
-      icon: 'none'
-    });
-  },
-
   // 分析记录
   onAnalysisHistoryTap() {
     if (!this.data.isLoggedIn) {
@@ -437,58 +355,8 @@ Page({
       return;
     }
 
-    wx.showToast({
-      title: '分析记录',
-      icon: 'none'
-    });
-  },
-
-  // 系统通知
-  onSystemNotificationTap() {
-    if (!this.data.isLoggedIn) {
-      this.onLoginTap();
-      return;
-    }
-
-    // 清除未读消息数量
-    this.setData({
-      'messageCount.system': 0
-    });
-
-    wx.showToast({
-      title: '系统通知',
-      icon: 'none'
-    });
-  },
-
-  // 评论回复
-  onCommentReplyTap() {
-    if (!this.data.isLoggedIn) {
-      this.onLoginTap();
-      return;
-    }
-
-    wx.showToast({
-      title: '评论回复',
-      icon: 'none'
-    });
-  },
-
-  // 点赞通知
-  onLikeNotificationTap() {
-    if (!this.data.isLoggedIn) {
-      this.onLoginTap();
-      return;
-    }
-
-    // 清除未读消息数量
-    this.setData({
-      'messageCount.likes': 0
-    });
-
-    wx.showToast({
-      title: '点赞通知',
-      icon: 'none'
+    wx.navigateTo({
+      url: '/pages/analysis-history/analysis-history'
     });
   },
 
@@ -552,11 +420,6 @@ Page({
               nickname: '',
               avatar: '',
               stats: {
-                posts: 0,
-                likes: 0,
-                follows: 0,
-                collections: 0,
-                comments: 0,
                 analysis: 0
               }
             }

@@ -1,0 +1,10 @@
+{
+  "name": "deleteAnalysisRecord",
+  "version": "1.0.0",
+  "description": "删除分析记录",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
+

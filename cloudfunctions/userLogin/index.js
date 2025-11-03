@@ -34,11 +34,6 @@ exports.main = async (event, context) => {
         province: userProfile.province || '',
         country: userProfile.country || '',
         stats: {
-          posts: 0,
-          likes: 0,
-          follows: 0,
-          collections: 0,
-          comments: 0,
           analysis: 0
         },
         createTime: new Date(),
