@@ -213,6 +213,7 @@ async function callBailianAPI(params) {
     console.log('图片URL:', imageUrl);
     
     // 构建请求数据
+    // 百炼应用API格式：直接传递prompt（图片URL）和业务参数
     const data = {
       input: {
         prompt: imageUrl,  // 图片URL作为prompt
@@ -316,58 +317,77 @@ function parseAnalysisResult(resultText) {
     console.log('parseAnalysisResult 输入类型:', typeof resultText);
     console.log('parseAnalysisResult 输入内容（前100字）:', JSON.stringify(resultText).substring(0, 100));
     
-    // 如果是对象且有 output 字段（百炼API返回格式）
+    let summaryText = '';
+    
+    // 提取文本内容
     if (typeof resultText === 'object' && resultText.output) {
       console.log('检测到百炼API返回格式，提取 output 字段');
-      return {
-        summary: resultText.output,
-        overallScore: 85,  // 默认分数
-        aspects: []
-      };
-    }
-    
-    // 如果是字符串
-    if (typeof resultText === 'string') {
+      summaryText = resultText.output;
+    } else if (typeof resultText === 'string') {
       try {
         // 尝试解析JSON
         const parsed = JSON.parse(resultText);
         if (parsed.output) {
-          // 如果解析后有 output 字段
-          return {
-            summary: parsed.output,
-            overallScore: 85,
-            aspects: []
-          };
+          summaryText = parsed.output;
+        } else if (parsed.summary) {
+          return parsed; // 已经是正确格式
+        } else {
+          summaryText = resultText;
         }
-        return parsed;
       } catch (e) {
         // 不是JSON，直接作为summary返回
-        return {
-          summary: resultText,
-          overallScore: 85,
-          aspects: []
-        };
+        summaryText = resultText;
       }
+    } else if (typeof resultText === 'object' && resultText.summary) {
+      return resultText; // 已经是正确格式
+    } else {
+      summaryText = String(resultText);
     }
     
-    // 如果已经是正确格式的对象
-    if (typeof resultText === 'object' && resultText.summary) {
-      return resultText;
-    }
+    // 🔍 检测不合格图片的关键词
+    const invalidKeywords = [
+      '请上传合格',
+      '不合格',
+      '无法识别',
+      '不符合要求',
+      '非户型图',
+      '请重新上传',
+      '图片不清晰',
+      '缺少方位标识'
+    ];
     
-    // 其他情况，转为字符串
-    return {
-      summary: String(resultText),
-      overallScore: 85,
-      aspects: []
-    };
+    const isInvalidImage = invalidKeywords.some(keyword => 
+      summaryText.includes(keyword)
+    );
+    
+    console.log('是否为不合格图片:', isInvalidImage);
+    
+    // 根据是否合格返回不同的结果
+    if (isInvalidImage) {
+      // 不合格图片：设置为0分或负分，标记为不合格
+      return {
+        summary: summaryText,
+        overallScore: 0,  // 不合格评分为0
+        aspects: [],
+        isValid: false    // 标记为不合格
+      };
+    } else {
+      // 合格图片：给正常评分
+      return {
+        summary: summaryText,
+        overallScore: 85,  // 默认合格分数
+        aspects: [],
+        isValid: true      // 标记为合格
+      };
+    }
     
   } catch (error) {
     console.error('解析结果失败:', error);
     return {
       summary: String(resultText),
-      overallScore: 85,
-      aspects: []
+      overallScore: 0,
+      aspects: [],
+      isValid: false
     };
   }
 }
