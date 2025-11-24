@@ -73,6 +73,18 @@
   color: #00a870;
 }
 
+/* 不合格状态样式 */
+.status-warning {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.status-warning-text {
+  font-size: 24rpx;
+  color: #e34d59;
+}
+
 .analysis-results {
   display: flex;
   flex-direction: column;
@@ -130,6 +142,17 @@
   font-size: 28rpx;
   color: #ffffff;
   font-weight: 500;
+}
+
+/* 不合格评分样式 */
+.score-invalid {
+  background: linear-gradient(135deg, #e34d59 0%, #f56c6c 100%) !important;
+}
+
+.score-invalid-text {
+  font-size: 48rpx !important;
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .result-header {

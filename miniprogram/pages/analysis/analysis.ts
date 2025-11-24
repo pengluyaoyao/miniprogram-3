@@ -138,11 +138,23 @@ Page({
 
   // 移除图片
   onUploadRemove() {
+    // 清空图片、分析结果和所有相关状态
     this.setData({
       'formData.imageUrl': '',
-      uploadFiles: []
+      uploadFiles: [],
+      analysisResult: null,          // 清空分析结果
+      isAnalyzing: false,            // 重置分析状态
+      currentAnalysisId: '',         // 清空分析ID
+      overallScore: 0                // 重置评分
     });
+    
     this.checkCanPublish();
+    
+    wx.showToast({
+      title: '已清空',
+      icon: 'success',
+      duration: 1500
+    });
   },
 
   // 表单数据变化

@@ -1,27 +1,26 @@
 <!--分析户型页面-->
 <view class="analysis-container">
-  <!-- 户型图片上传 -->
+  <!-- 户型描述 -->
   <view class="section">
-    <view class="section-title">户型图片</view>
+    <view class="section-title">户型描述</view>
     <view class="form-item">
-      <view class="form-label">上传户型图</view>
-      <t-upload
-        mediaType="{{['image']}}"
-        files="{{uploadFiles}}"
-        bind:success="onUploadSuccess"
-        bind:remove="onUploadRemove"
-        bind:fail="onUploadFail"
-        max="1"
-        gridConfig="{{gridConfig}}"
-        size-limit="{{10 * 1024 * 1024}}"
+      <view class="form-label">户型详情</view>
+      <t-textarea
+        placeholder="请详细描述您的户型布局，如：进门是玄关，左边是客厅，右边是餐厅，主卧朝南，次卧朝北，厨房在西边，卫生间在北边等..."
+        value="{{formData.houseDescription}}"
+        bind:change="onFormChange"
+        data-field="houseDescription"
+        maxlength="500"
+        indicator
+        autosize
       />
     </view>
-    <view class="upload-tip">请上传户型图，支持 JPG、PNG 格式，最大 10MB</view>
+    <view class="upload-tip">请尽可能详细地描述户型布局，有助于获得更准确的分析结果</view>
   </view>
 
   <!-- 基本信息 -->
   <view class="section">
-    <view class="section-title">基本信息(选填)</view>
+    <view class="section-title">基本信息</view>
     
     <!-- 生辰八字 -->
     <view class="form-item">
@@ -140,9 +139,7 @@
           <view class="result-title">{{item.title}}</view>
           <view class="result-score">{{item.score}}分</view>
         </view>
-        <view class="result-content">
-          <text class="content-text">{{item.content}}</text>
-        </view>
+        <view class="result-content">{{item.content}}</view>
         <view class="result-suggestions" wx:if="{{item.suggestions && item.suggestions.length > 0}}">
           <view class="suggestions-title">改善建议：</view>
           <view class="suggestion-item" wx:for="{{item.suggestions}}" wx:for-item="suggestion" wx:key="*this">
@@ -155,9 +152,7 @@
     <!-- 总结 -->
     <view class="analysis-summary" wx:if="{{analysisResult.summary}}">
       <view class="summary-title">分析总结</view>
-      <view class="summary-content">
-        <text class="summary-text">{{analysisResult.summary}}</text>
-      </view>
+      <view class="summary-content">{{analysisResult.summary}}</view>
     </view>
   </view>
 
@@ -179,7 +174,7 @@
   <view class="analyzing-overlay" wx:if="{{isAnalyzing}}">
     <view class="analyzing-content">
       <t-loading size="60rpx" />
-      <text class="analyzing-text">正在分析中，请稍候...</text>
+      <text class="analyzing-text">AI正在分析中，请稍候...</text>
     </view>
   </view>
 </view>
