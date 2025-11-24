@@ -1,26 +1,37 @@
 <!--分析户型页面-->
 <view class="analysis-container">
-  <!-- 户型描述 -->
+  <!-- 户型图上传 -->
   <view class="section">
-    <view class="section-title">户型描述</view>
+    <view class="section-title">户型图上传</view>
     <view class="form-item">
-      <view class="form-label">户型详情</view>
-      <t-textarea
-        placeholder="请详细描述您的户型布局，如：进门是玄关，左边是客厅，右边是餐厅，主卧朝南，次卧朝北，厨房在西边，卫生间在北边等..."
-        value="{{formData.houseDescription}}"
-        bind:change="onFormChange"
-        data-field="houseDescription"
-        maxlength="500"
-        indicator
-        autosize
+      <view class="form-label">请上传户型图</view>
+      <t-upload
+        files="{{uploadFiles}}"
+        gridConfig="{{gridConfig}}"
+        max="1"
+        bind:success="onUploadSuccess"
+        bind:fail="onUploadFail"
+        bind:remove="onUploadRemove"
       />
     </view>
-    <view class="upload-tip">请尽可能详细地描述户型布局，有助于获得更准确的分析结果</view>
+    <view class="upload-tip">
+      <t-icon name="info-circle" size="28rpx" color="#999" />
+
+      <text>请上传清晰的，有指南针方向的户型图，支持 JPG、PNG 格式，有助于获得更准确的分析结果。 例图： </text>
+        <t-image 
+          src="https://636c-cloud1-2grdaeu00966fc03-1380239870.tcb.qcloud.la/house_images/1759385683449_gab0dzf3i1l.jpg?sign=aa6ac4c56cc4cb37a6f4aa6b1e94f68b&t=1762828233" 
+          mode="aspectFill"
+          width="200rpx"
+          height="200rpx"
+          shape="round"
+          error="加载失败"
+        />
+    </view>
   </view>
 
   <!-- 基本信息 -->
   <view class="section">
-    <view class="section-title">基本信息</view>
+    <view class="section-title">基本信息(选填)</view>
     
     <!-- 生辰八字 -->
     <view class="form-item">
@@ -120,12 +131,18 @@
       </view>
     </view>
 
+
     <!-- 总体评分 -->
     <view class="overall-score">
       <view class="score-title">综合评分</view>
       <view class="score-value">{{overallScore}}</view>
       <view class="score-unit">分</view>
     </view>
+
+       <!-- 友情提示 -->
+     <view class="status-indicator">
+        <text class="status-text">以下为AI分析结果，仅供参考</text>
+      </view>
 
     <!-- 分析详情 -->
     <view class="analysis-results">
@@ -139,7 +156,9 @@
           <view class="result-title">{{item.title}}</view>
           <view class="result-score">{{item.score}}分</view>
         </view>
-        <view class="result-content">{{item.content}}</view>
+        <view class="result-content">
+          <text class="content-text">{{item.content}}</text>
+        </view>
         <view class="result-suggestions" wx:if="{{item.suggestions && item.suggestions.length > 0}}">
           <view class="suggestions-title">改善建议：</view>
           <view class="suggestion-item" wx:for="{{item.suggestions}}" wx:for-item="suggestion" wx:key="*this">
@@ -152,7 +171,9 @@
     <!-- 总结 -->
     <view class="analysis-summary" wx:if="{{analysisResult.summary}}">
       <view class="summary-title">分析总结</view>
-      <view class="summary-content">{{analysisResult.summary}}</view>
+      <view class="summary-content">
+        <text class="summary-text">{{analysisResult.summary}}</text>
+      </view>
     </view>
   </view>
 

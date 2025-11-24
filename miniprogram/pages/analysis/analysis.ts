@@ -58,9 +58,15 @@ Page({
     }
   },
 
-  onLoad() {
+  onLoad(options: any) {
     // 页面加载时的初始化
     wx.cloud.init();
+    
+    // 如果从订阅消息通知进入，带有taskId参数，加载对应的分析结果
+    if (options && options.taskId) {
+      console.log('从消息通知进入，taskId:', options.taskId);
+      this.loadAnalysisResult(options.taskId);
+    }
   },
 
   // 图片上传成功
@@ -202,6 +208,23 @@ Page({
       return;
     }
 
+    // 请求订阅消息授权（用户离开后完成时通知）
+    try {
+      await wx.requestSubscribeMessage({
+        tmplIds: ['0hz_amBSAdeRaNhLI0u832OhnPR0Qcl9vF03Ec5jIRE'],
+        success: (res: any) => {
+          console.log('订阅消息授权结果:', res);
+        },
+        fail: (err: any) => {
+          console.log('用户未授权订阅消息:', err);
+          // 即使用户拒绝订阅，也继续分析
+        }
+      });
+    } catch (e) {
+      console.log('订阅消息请求异常:', e);
+      // 继续执行分析
+    }
+
     this.setData({ isAnalyzing: true });
 
     // 显示加载提示（异步模式）
@@ -234,7 +257,7 @@ Page({
 
       // 更新加载提示
       wx.showLoading({
-        title: '分析中，请稍候...',
+        title: '分析中，您可以离开小程序，完成后会通知您...',
         mask: true
       });
 
@@ -268,6 +291,15 @@ Page({
           icon: 'success',
           duration: 2000
         });
+        
+        // 提示用户：您也可以离开小程序，完成后会收到消息通知
+        // setTimeout(() => {
+        //   wx.showToast({
+        //     title: '您可以离开小程序，完成后会通知您',
+        //     icon: 'none',
+        //     duration: 3000
+        //   });
+        // }, 2500);
       } else {
         console.error('分析失败 - success:', result.success, ', result:', result.result);
         throw new Error(result.message || '分析失败');
@@ -291,5 +323,52 @@ Page({
       });
     }
   },
+
+  // 加载历史分析结果（从消息通知进入时调用）
+  async loadAnalysisResult(taskId: string) {
+    wx.showLoading({
+      title: '加载分析结果...',
+      mask: true
+    });
+    
+    try {
+      const result = await wx.cloud.callFunction({
+        name: 'aiAnalysis',
+        data: {
+          name: 'getAnalysisResult',
+          taskId: taskId
+        }
+      }) as any;
+      
+      console.log('加载分析结果:', result);
+      
+      if (result.result.success && result.result.result) {
+        this.setData({
+          analysisResult: result.result.result,
+          currentAnalysisId: taskId,
+          overallScore: result.result.result.overallScore || 0,
+          isAnalyzing: false
+        });
+        
+        wx.hideLoading();
+        wx.showToast({
+          title: '加载成功',
+          icon: 'success',
+          duration: 2000
+        });
+      } else {
+        throw new Error(result.result.message || '加载失败');
+      }
+      
+    } catch (error) {
+      console.error('加载分析结果失败:', error);
+      wx.hideLoading();
+      wx.showModal({
+        title: '加载失败',
+        content: '无法加载该分析结果，请重新分析',
+        showCancel: false
+      });
+    }
+  }
 
 });

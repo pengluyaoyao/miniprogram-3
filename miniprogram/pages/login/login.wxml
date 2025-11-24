@@ -5,8 +5,8 @@
     <view class="logo">
       <t-icon name="home" size="80rpx" color="#ffffff" />
     </view>
-    <view class="app-title">风水户型分析</view>
-    <view class="app-desc">专业的AI风水分析平台</view>
+    <view class="app-title">户型分析</view>
+    <view class="app-desc">专业的AI户型分析平台</view>
   </view>
 
   <!-- 登录选项 -->
@@ -54,28 +54,19 @@
           <t-icon name="image" size="32rpx" color="#0052d9" />
         </view>
         <view class="feature-content">
-          <view class="feature-title">AI风水分析</view>
-          <view class="feature-desc">上传户型图，获得专业的AI风水分析报告</view>
+          <view class="feature-title">AI户型分析优化</view>
+          <view class="feature-desc">上传户型图，获得专业的AI户型分析报告</view>
         </view>
       </view>
 
-      <view class="feature-item">
-        <view class="feature-icon">
-          <t-icon name="chat" size="32rpx" color="#00a870" />
-        </view>
-        <view class="feature-content">
-          <view class="feature-title">社区互动</view>
-          <view class="feature-desc">分享分析结果，与其他用户交流风水心得</view>
-        </view>
-      </view>
 
       <view class="feature-item">
         <view class="feature-icon">
           <t-icon name="edit" size="32rpx" color="#8b5cf6" />
         </view>
         <view class="feature-content">
-          <view class="feature-title">专业建议</view>
-          <view class="feature-desc">根据生辰八字提供个性化风水布局建议</view>
+          <view class="feature-title">个性化布局建议</view>
+          <view class="feature-desc">根据您的关注提供个性化户型布局建议</view>
         </view>
       </view>
     </view>

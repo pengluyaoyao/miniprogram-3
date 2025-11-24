@@ -95,9 +95,16 @@ async function createAnalysisAsync(params) {
       throw new Error('缺少用户ID参数');
     }
     
+    // 获取用户的openid（用于发送订阅消息）
+    const wxContext = cloud.getWXContext();
+    const openid = wxContext.OPENID;
+    
+    console.log('用户openid:', openid);
+    
     // 立即创建任务记录（状态为 pending）
     const taskRecord = {
       userId: userId,
+      openid: openid,  // 保存openid，用于后续发送订阅消息
       imageUrl: houseDescription,  // 户型图URL
       houseDescription: houseDescription,  // 保持兼容性
       houseInfo: houseInfo,
@@ -132,7 +139,16 @@ async function processAnalysisInBackground(taskId, params) {
   console.log('后台处理任务:', taskId);
   console.log('传入的 params:', JSON.stringify(params, null, 2));
   
+  let taskOpenid = null;
+  
   try {
+    // 获取任务信息（包括openid）
+    const taskInfo = await db.collection('house_analysis').doc(taskId).get();
+    if (taskInfo.data && taskInfo.data.openid) {
+      taskOpenid = taskInfo.data.openid;
+      console.log('获取到任务的openid:', taskOpenid);
+    }
+    
     // 更新状态为处理中
     await db.collection('house_analysis').doc(taskId).update({
       data: {
@@ -179,6 +195,25 @@ async function processAnalysisInBackground(taskId, params) {
       });
       
       console.log('已保存到数据库，taskId:', taskId);
+      
+      // 🆕 发送订阅消息通知用户
+      console.log('检查是否需要发送订阅消息，taskOpenid:', taskOpenid);
+      if (taskOpenid) {
+        try {
+          console.log('开始发送订阅消息...');
+          await sendSubscribeMessage({
+            openid: taskOpenid,
+            taskId: taskId
+          });
+          console.log('✅ 订阅消息发送成功！');
+        } catch (msgError) {
+          console.error('❌ 发送订阅消息失败:', msgError);
+          console.error('错误详情:', msgError.message || msgError);
+          // 不影响主流程，继续执行
+        }
+      } else {
+        console.log('⚠️ 未找到openid，跳过发送订阅消息');
+      }
       
       console.log('✅ 分析完成:', taskId);
     } else {
@@ -311,6 +346,114 @@ async function getAnalysisResult(params) {
   }
 }
 
+// 发送订阅消息
+async function sendSubscribeMessage({ openid, taskId }) {
+  try {
+    console.log('🔔 准备发送订阅消息:', { openid, taskId });
+    
+    const now = new Date();
+    const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    
+    // 请到微信公众平台查看您的模板实际字段名
+    // 模板ID: 0hz_amBSAdeRaNhLI0u832OhnPR0Qcl9vF03Ec5jIRE
+    // 字段：方案名称、完成时间、温馨提醒
+    const result = await cloud.openapi.subscribeMessage.send({
+      touser: openid,
+      page: `pages/analysis/analysis?taskId=${taskId}`,  // 带上任务ID，点击消息后跳转
+      data: {
+        thing1: {
+          value: '户型优化分析'  // 方案名称（最多20个字符）
+        },
+        time2: {
+          value: timeStr  // 完成时间
+        },
+        thing3: {
+          value: '分析已完成，点击查看详情'  // 温馨提醒（最多20个字符）
+        }
+      },
+      templateId: '0hz_amBSAdeRaNhLI0u832OhnPR0Qcl9vF03Ec5jIRE',
+      miniprogramState: 'formal'  // 开发版，正式发布时改为 'formal'
+    });
+    
+    console.log('🎉 订阅消息发送成功！结果:', JSON.stringify(result, null, 2));
+    return result;
+  } catch (error) {
+    console.error('❌ 发送订阅消息失败:', error);
+    console.error('错误代码:', error.errCode);
+    console.error('错误信息:', error.errMsg);
+    console.error('完整错误:', JSON.stringify(error, null, 2));
+    throw error;
+  }
+}
+
+// 智能评分：根据文本内容分析打分（40-90分）
+function calculateScoreFromText(text) {
+  // 基准分数
+  let score = 65;
+  
+  // 正面关键词（每个+2分，最多+25分）
+  const positiveKeywords = [
+    '吉利', '吉祥', '旺', '兴旺', '好', '佳', '优', '利', '顺', '和',
+    '财运亨通', '事业有成', '家和万事兴', '平安', '健康', '如意',
+    '聚财', '纳福', '招财', '进宝', '福气', '贵气', '生气', '旺气',
+    '朝气蓬勃', '光明', '开阔', '通透', '宜居', '舒适', '和谐',
+    '稳定', '安定', '繁荣', '昌盛', '兴旺发达', '蒸蒸日上',
+    '有利于', '适合', '符合', '合理', '理想'
+  ];
+  
+  // 负面关键词（每个-2分，最多-25分）
+  const negativeKeywords = [
+    '煞', '冲', '克', '忌', '凶', '差', '不利', '不好', '不佳', '欠佳',
+    '破财', '漏财', '散财', '损财', '耗财', '败运', '衰', '煞气',
+    '阴暗', '潮湿', '压抑', '拥挤', '狭窄', '混乱', '杂乱',
+    '不宜', '应避免', '需注意', '有隐患', '问题', '缺陷',
+    '阻碍', '妨碍', '影响', '干扰', '冲突', '矛盾'
+  ];
+  
+  // 中等关键词（不影响评分，但计数）
+  const neutralKeywords = [
+    '一般', '尚可', '可以', '普通', '中等', '平平', '不错'
+  ];
+  
+  let positiveCount = 0;
+  let negativeCount = 0;
+  let neutralCount = 0;
+  
+  // 统计正面词汇
+  positiveKeywords.forEach(keyword => {
+    const matches = (text.match(new RegExp(keyword, 'g')) || []).length;
+    positiveCount += matches;
+  });
+  
+  // 统计负面词汇
+  negativeKeywords.forEach(keyword => {
+    const matches = (text.match(new RegExp(keyword, 'g')) || []).length;
+    negativeCount += matches;
+  });
+  
+  // 统计中性词汇
+  neutralKeywords.forEach(keyword => {
+    const matches = (text.match(new RegExp(keyword, 'g')) || []).length;
+    neutralCount += matches;
+  });
+  
+  console.log('评分统计 - 正面词:', positiveCount, '负面词:', negativeCount, '中性词:', neutralCount);
+  
+  // 计算分数调整
+  const positiveBonus = Math.min(positiveCount * 2, 25);  // 最多+25分
+  const negativePenalty = Math.min(negativeCount * 2, 25); // 最多-25分
+  
+  // 最终分数 = 基准分 + 正面加分 - 负面扣分
+  score = score + positiveBonus - negativePenalty;
+  
+  // 确保分数在40-90之间
+  score = Math.max(40, Math.min(90, score));
+  
+  console.log('智能评分结果:', score, '分 (基准65 + 正面', positiveBonus, '- 负面', negativePenalty, ')');
+  
+  return Math.round(score);
+}
+
 // 解析分析结果
 function parseAnalysisResult(resultText) {
   try {
@@ -364,7 +507,7 @@ function parseAnalysisResult(resultText) {
     
     // 根据是否合格返回不同的结果
     if (isInvalidImage) {
-      // 不合格图片：设置为0分或负分，标记为不合格
+      // 不合格图片：设置为0分，标记为不合格
       return {
         summary: summaryText,
         overallScore: 0,  // 不合格评分为0
@@ -372,10 +515,12 @@ function parseAnalysisResult(resultText) {
         isValid: false    // 标记为不合格
       };
     } else {
-      // 合格图片：给正常评分
+      // 合格图片：根据文本内容智能评分（40-90分）
+      const calculatedScore = calculateScoreFromText(summaryText);
+      
       return {
         summary: summaryText,
-        overallScore: 85,  // 默认合格分数
+        overallScore: calculatedScore,  // 智能评分
         aspects: [],
         isValid: true      // 标记为合格
       };

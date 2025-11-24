@@ -390,7 +390,7 @@ Page({
   onAboutTap() {
     wx.showModal({
       title: '关于我们',
-      content: '风水户型分析 v1.0.0\n\n专业的AI风水分析平台，为您提供个性化的风水布局建议。',
+      content: '户型分析优化助手 v1.0.0\n\n专业的AI分析平台，为您提供个性化的户型布局建议。',
       showCancel: false
     });
   },

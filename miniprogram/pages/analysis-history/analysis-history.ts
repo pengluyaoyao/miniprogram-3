@@ -17,7 +17,9 @@ Page({
   data: {
     records: [] as AnalysisRecord[],
     loading: true,
-    isEmpty: false
+    isEmpty: false,
+    showDetailModal: false,  // 控制浮动窗口显示
+    currentRecord: null as AnalysisRecord | null  // 当前选中的记录
   },
 
   onLoad() {
@@ -58,8 +60,10 @@ Page({
 
       console.log('历史记录查询结果:', result);
 
-      if (result.result && result.result.success) {
-        const records = result.result.records || [];
+      const cloudResult = result.result as any;
+
+      if (cloudResult && cloudResult.success) {
+        const records = cloudResult.records || [];
         
         // 只显示已完成的记录
         const completedRecords = records.filter((record: AnalysisRecord) => 
@@ -74,7 +78,7 @@ Page({
           loading: false
         });
       } else {
-        throw new Error(result.result?.message || '查询失败');
+        throw new Error(cloudResult?.message || '查询失败');
       }
 
     } catch (error) {
@@ -90,7 +94,7 @@ Page({
     }
   },
 
-  // 查看分析详情
+  // 查看分析详情（显示浮动窗口）
   onRecordTap(e: any) {
     const { id } = e.currentTarget.dataset;
     const record = this.data.records.find(r => r._id === id);
@@ -101,9 +105,18 @@ Page({
 
     console.log('查看记录详情:', record);
 
-    // 跳转到详情页面（可以复用 detail 页面或创建新页面）
-    wx.navigateTo({
-      url: `/pages/analysis-history/detail?id=${id}`
+    // 显示浮动窗口
+    this.setData({
+      showDetailModal: true,
+      currentRecord: record
+    });
+  },
+
+  // 关闭浮动窗口
+  closeDetailModal() {
+    this.setData({
+      showDetailModal: false,
+      currentRecord: null
     });
   },
 
@@ -128,7 +141,9 @@ Page({
 
             wx.hideLoading();
 
-            if (result.result && result.result.success) {
+            const cloudResult = result.result as any;
+
+            if (cloudResult && cloudResult.success) {
               wx.showToast({
                 title: '删除成功',
                 icon: 'success'
@@ -137,7 +152,7 @@ Page({
               // 刷新列表
               this.loadAnalysisHistory();
             } else {
-              throw new Error(result.result?.message || '删除失败');
+              throw new Error(cloudResult?.message || '删除失败');
             }
 
           } catch (error) {

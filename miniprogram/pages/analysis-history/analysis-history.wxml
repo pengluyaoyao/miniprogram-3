@@ -75,5 +75,84 @@
       </view>
     </view>
   </view>
+
+  <!-- 浮动详情窗口 -->
+  <view class="detail-modal" wx:if="{{showDetailModal}}" catchtap="closeDetailModal">
+    <view class="modal-content" catchtap="{{null}}">
+      <!-- 关闭按钮 -->
+      <view class="modal-close" bindtap="closeDetailModal">
+        <t-icon name="close" size="40rpx" color="#666" />
+      </view>
+
+      <!-- 标题 -->
+      <view class="modal-title">分析结果</view>
+
+      <!-- 可滚动的内容区域 -->
+      <scroll-view class="modal-scroll" scroll-y>
+        <view class="modal-body">
+          <!-- 综合评分 -->
+          <view class="modal-score" wx:if="{{currentRecord.analysisResult.overallScore}}">
+            <view class="score-label">综合评分</view>
+            <view class="score-value">{{currentRecord.analysisResult.overallScore}}</view>
+            <view class="score-unit">分</view>
+          </view>
+
+          <!-- 分析总结 -->
+          <view class="modal-section" wx:if="{{currentRecord.analysisResult.summary}}">
+            <view class="section-title">分析总结</view>
+            <view class="section-content">
+              <text class="content-text">{{currentRecord.analysisResult.summary}}</text>
+            </view>
+          </view>
+
+          <!-- 各方面分析 -->
+          <view class="modal-section" wx:if="{{currentRecord.analysisResult.aspects && currentRecord.analysisResult.aspects.length > 0}}">
+            <view class="section-title">详细分析</view>
+            <view 
+              class="aspect-item" 
+              wx:for="{{currentRecord.analysisResult.aspects}}" 
+              wx:key="type"
+            >
+              <view class="aspect-header">
+                <view class="aspect-title">{{item.title}}</view>
+                <view class="aspect-score" wx:if="{{item.score}}">{{item.score}}分</view>
+              </view>
+              <view class="aspect-content">
+                <text class="content-text">{{item.content}}</text>
+              </view>
+              <!-- 改善建议 -->
+              <view class="aspect-suggestions" wx:if="{{item.suggestions && item.suggestions.length > 0}}">
+                <view class="suggestions-title">改善建议：</view>
+                <view class="suggestion-item" wx:for="{{item.suggestions}}" wx:for-item="suggestion" wx:key="*this">
+                  • {{suggestion}}
+                </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 户型信息 -->
+          <view class="modal-section">
+            <view class="section-title">户型信息</view>
+            <view class="info-row">
+              <text class="info-label">房间数：</text>
+              <text class="info-value">{{currentRecord.houseInfo.rooms || '未填写'}}</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">面积：</text>
+              <text class="info-value">{{currentRecord.houseInfo.area || '未填写'}}</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">朝向：</text>
+              <text class="info-value">{{currentRecord.houseInfo.orientation || '未填写'}}</text>
+            </view>
+            <view class="info-row">
+              <text class="info-label">楼层：</text>
+              <text class="info-value">{{currentRecord.houseInfo.floor || '未填写'}}/{{currentRecord.houseInfo.totalFloors || '未填写'}}</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
 </view>
 

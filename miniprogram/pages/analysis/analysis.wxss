@@ -33,8 +33,16 @@
 
 .upload-tip {
   font-size: 24rpx;
-  color: #666666;
+  color: #999999;
   margin-top: 16rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
+  line-height: 1.6;
+}
+
+.upload-tip text {
+  flex: 1;
 }
 
 /* 表单样式 */
