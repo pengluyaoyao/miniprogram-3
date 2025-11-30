@@ -1,0 +1,82 @@
+<!--分享详情页面-->
+<view class="share-detail-container">
+  <!-- 顶部标识 -->
+  <view class="share-badge">
+    <t-icon name="share" size="32rpx" color="#0052d9" />
+    <text class="badge-text">好友分享</text>
+  </view>
+
+  <!-- 标题区域 -->
+  <view class="title-section">
+    <text class="share-title">{{shareTitle}}</text>
+  </view>
+
+  <!-- 户型概况卡片 -->
+  <view class="info-card">
+    <view class="card-title">
+      <view class="title-icon">📐</view>
+      <text>户型概况</text>
+    </view>
+    <view class="info-grid">
+      <view class="info-item" wx:if="{{houseInfo.rooms}}">
+        <text class="info-label">户型</text>
+        <text class="info-value">{{houseInfo.rooms}}</text>
+      </view>
+      <view class="info-item" wx:if="{{houseInfo.area}}">
+        <text class="info-label">面积</text>
+        <text class="info-value">{{houseInfo.area}}㎡</text>
+      </view>
+      <view class="info-item" wx:if="{{houseInfo.orientation}}">
+        <text class="info-label">朝向</text>
+        <text class="info-value">{{houseInfo.orientation}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 户型亮点卡片 -->
+  <view class="info-card" wx:if="{{highlights.length > 0}}">
+    <view class="card-title">
+      <view class="title-icon">✨</view>
+      <text>户型亮点</text>
+    </view>
+    <view class="highlights-list">
+      <view class="highlight-item" wx:for="{{highlights}}" wx:key="*this">
+        <text class="highlight-dot">•</text>
+        <text class="highlight-text">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 专业分析卡片 -->
+  <view class="info-card">
+    <view class="card-title">
+      <view class="title-icon">💡</view>
+      <text>专业分析摘要</text>
+    </view>
+    <view class="analysis-content">
+      <text class="analysis-text">{{analysisSummary}}</text>
+    </view>
+  </view>
+
+  <!-- 引导卡片 -->
+  <view class="cta-card">
+    <view class="cta-icon">🎯</view>
+    <view class="cta-title">想了解你家户型的优缺点？</view>
+    <view class="cta-subtitle">专业户型测评，3分钟获得详细报告</view>
+    <t-button
+      theme="primary"
+      size="large"
+      block
+      bind:tap="goToAnalysis"
+      class="cta-button"
+    >
+      立即体验专业测评
+    </t-button>
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="footer-tips">
+    <text class="tip-text">上传户型图 → AI智能分析 → 获得专业建议</text>
+  </view>
+</view>
+

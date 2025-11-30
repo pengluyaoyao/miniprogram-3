@@ -69,6 +69,83 @@ Page({
     }
   },
 
+  // 分享配置
+  onShareAppMessage() {
+    const { analysisResult, formData } = this.data;
+    
+    if (!analysisResult) {
+      return {
+        title: '户型优化分析',
+        path: '/pages/analysis/analysis'
+      };
+    }
+
+    // 生成分享文案（不包含分数）
+    const copy = this.generateShareCopy();
+    
+    // 构建分享详情页的URL参数
+    const params: string[] = [];
+    params.push(`title=${encodeURIComponent(copy.title)}`);
+    
+    if (formData.rooms) {
+      params.push(`rooms=${encodeURIComponent(formData.rooms)}`);
+    }
+    if (formData.area) {
+      params.push(`area=${encodeURIComponent(formData.area)}`);
+    }
+    if (formData.orientation) {
+      params.push(`orientation=${encodeURIComponent(formData.orientation)}`);
+    }
+    
+    // 提取亮点
+    const summary = analysisResult.summary || '';
+    const positiveKeywords = ['通透', '开阔', '舒适', '和谐', '明亮', '宽敞', '采光', '布局', '合理', '实用'];
+    const highlights = positiveKeywords.filter(k => summary.includes(k)).slice(0, 3);
+    if (highlights.length > 0) {
+      params.push(`highlights=${encodeURIComponent(JSON.stringify(highlights))}`);
+    }
+    
+    // 分析摘要（限制长度）
+    const summaryText = summary.substring(0, 150);
+    params.push(`summary=${encodeURIComponent(summaryText)}`);
+    
+    const sharePath = `/pages/share-detail/share-detail?${params.join('&')}`;
+    
+    return {
+      title: copy.title,
+      path: sharePath,
+      imageUrl: formData.imageUrl || undefined
+    };
+  },
+
+  // 分享到朋友圈配置（需要基础库 2.11.3+）
+  onShareTimeline() {
+    const { analysisResult, formData } = this.data;
+    
+    if (!analysisResult) {
+      return {
+        title: '户型优化分析'
+      };
+    }
+
+    const copy = this.generateShareCopy();
+    
+    // 朋友圈也使用分享详情页
+    const queryParams: string[] = [];
+    queryParams.push(`title=${encodeURIComponent(copy.title)}`);
+    if (formData.rooms) {
+      queryParams.push(`rooms=${encodeURIComponent(formData.rooms)}`);
+    }
+    if (formData.area) {
+      queryParams.push(`area=${encodeURIComponent(formData.area)}`);
+    }
+    
+    return {
+      title: copy.title,
+      query: queryParams.join('&')
+    };
+  },
+
   // 图片上传成功
   async onUploadSuccess(e: any) {
     const { files } = e.detail;
@@ -369,6 +446,104 @@ Page({
         showCancel: false
       });
     }
+  },
+
+  // 生成分享文案（不包含分数）
+  generateShareCopy() {
+    const { analysisResult, formData } = this.data;
+    
+    if (!analysisResult) return { title: '', content: '' };
+
+    // 提取分析中的亮点关键词
+    const summary = analysisResult.summary || '';
+    const rooms = formData.rooms || '温馨户型';
+    const area = formData.area || '';
+
+    // 提取正面关键词（避免迷信词汇）
+    const positiveKeywords = ['通透', '开阔', '舒适', '和谐', '明亮', '宽敞', '采光', '布局', '合理', '实用'];
+    const highlights = positiveKeywords.filter(keyword => summary.includes(keyword)).slice(0, 3);
+
+    // 小红书爆款标题模板（避免AI、风水等迷信词语）
+    const titleTemplates = [
+      `🏠 ${rooms}户型测评｜这些细节必须注意！`,
+      `✨ 实测！${rooms}户型住了3个月的真实感受`,
+      `🔥 ${rooms}户型优化指南｜后悔没早看`,
+      `💯 ${rooms}户型深度解析｜避坑必看`,
+      `🎯 ${rooms}户型实测｜优缺点全分析`,
+      `📐 ${rooms}${area ? area + '㎡' : ''}｜户型优化全攻略`,
+      `⚠️ ${rooms}户型踩坑记｜这些问题要注意`,
+      `🌟 ${rooms}户型改造｜前后对比太惊艳`,
+      `💡 ${rooms}户型布局｜实用性拉满`,
+      `🏆 ${rooms}户型测评｜性价比超高`
+    ];
+
+    // 如果有亮点关键词，生成更具体的标题
+    if (highlights.length > 0) {
+      const highlight1 = highlights[0];
+      const highlight2 = highlights[1] || '实用';
+      
+      titleTemplates.push(`✨ ${rooms}户型｜${highlight1}到让人羡慕`);
+      titleTemplates.push(`🏠 ${rooms}测评｜${highlight1}且${highlight2}！`);
+      titleTemplates.push(`💫 ${rooms}户型｜居然这么${highlight1}！`);
+      titleTemplates.push(`🎊 ${rooms}体验｜${highlight1}的宝藏户型`);
+      titleTemplates.push(`👀 ${rooms}户型｜${highlight1}+${highlight2}绝了`);
+    }
+
+    // 如果面积合适，加入面积相关标题
+    if (area) {
+      const areaNum = parseInt(area);
+      if (areaNum < 70) {
+        titleTemplates.push(`🏠 ${area}㎡小户型｜空间利用率超高`);
+        titleTemplates.push(`✨ ${area}㎡${rooms}｜小而精致的秘密`);
+      } else if (areaNum >= 90 && areaNum <= 120) {
+        titleTemplates.push(`🏠 ${area}㎡${rooms}｜刚需户型深度测评`);
+        titleTemplates.push(`✨ ${area}㎡户型｜舒适度满分`);
+      } else if (areaNum > 120) {
+        titleTemplates.push(`🏠 ${area}㎡${rooms}｜大户型优化方案`);
+        titleTemplates.push(`✨ ${area}㎡户型｜空间布局太合理`);
+      }
+    }
+
+    // 随机选择一个标题
+    const title = titleTemplates[Math.floor(Math.random() * titleTemplates.length)];
+
+    // 生成内容（不含分数）
+    let content = `【户型概况】\n`;
+    if (formData.rooms) content += `📐 ${formData.rooms}`;
+    if (formData.area) content += ` ${formData.area}㎡`;
+    content += `\n\n`;
+    
+    if (highlights.length > 0) {
+      content += `【户型亮点】\n`;
+      highlights.forEach(h => {
+        content += `✨ ${h}\n`;
+      });
+      content += `\n`;
+    }
+
+    content += `【专业分析摘要】\n${summary.substring(0, 120)}...\n\n`;
+    content += `💡 想了解你家户型的优缺点？\n快来体验专业户型测评！\n\n#户型测评 #户型优化 #家居设计 #装修干货`;
+
+    return { title, content };
+  },
+
+  // 分享给好友
+  shareToFriends() {
+    // 检查是否有分析结果
+    if (!this.data.analysisResult) {
+      wx.showToast({
+        title: '请先完成分析',
+        icon: 'none'
+      });
+      return;
+    }
+
+    // 提示用户点击右上角分享
+    wx.showToast({
+      title: '请点击右上角分享',
+      icon: 'none',
+      duration: 2000
+    });
   }
 
 });

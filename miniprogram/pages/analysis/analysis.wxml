@@ -141,7 +141,7 @@
 
        <!-- 友情提示 -->
      <view class="status-indicator">
-        <text class="status-text">以下为AI分析结果，仅供参考</text>
+        <text class="status-text">以下分析结果，仅供参考</text>
       </view>
 
     <!-- 分析详情 -->
@@ -173,6 +173,23 @@
       <view class="summary-title">分析总结</view>
       <view class="summary-content">
         <text class="summary-text">{{analysisResult.summary}}</text>
+      </view>
+    </view>
+
+    <!-- 分享按钮 -->
+    <view class="share-section" wx:if="{{analysisResult}}">
+      <t-button
+        theme="default"
+        size="large"
+        block
+        bind:tap="shareToFriends"
+        icon="share"
+      >
+        分享给好友
+      </t-button>
+      <view class="share-tip">
+        <t-icon name="info-circle" size="24rpx" color="#999" />
+        <text>分享你的户型分析结果</text>
       </view>
     </view>
   </view>

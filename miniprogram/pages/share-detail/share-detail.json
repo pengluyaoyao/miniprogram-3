@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "户型测评详情",
+  "navigationBarBackgroundColor": "#f0f4ff",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#f0f4ff",
+  "usingComponents": {
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
+}
+

@@ -4,7 +4,8 @@
     "pages/detail/detail",
     "pages/profile/profile",
     "pages/login/login",
-    "pages/analysis-history/analysis-history"
+    "pages/analysis-history/analysis-history",
+    "pages/share-detail/share-detail"
   ],
   "window": {
     "navigationBarTextStyle": "black",
