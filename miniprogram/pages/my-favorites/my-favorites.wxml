@@ -1,0 +1,28 @@
+<view class="page">
+  <view wx:if="{{needLogin}}" class="gate">
+    <text class="gate-t">登录后查看收藏</text>
+    <button class="gate-btn" bindtap="goLogin">去登录</button>
+  </view>
+
+  <block wx:else>
+    <view wx:if="{{loading}}" class="hint">加载中…</view>
+    <view wx:elif="{{empty}}" class="empty">暂无收藏。在信息详情页点击「收藏」即可加入此处。</view>
+    <view wx:else class="list">
+      <view
+        class="row"
+        wx:for="{{rows}}"
+        wx:key="_id"
+        data-id="{{item.listing_id}}"
+        data-type="{{item.listing_type}}"
+        bindtap="openDetail"
+      >
+        <view class="row-main">
+          <text class="title">{{item.title}}</text>
+          <text class="preview">{{item.typeLabel}}</text>
+          <text wx:if="{{item.timeLabel}}" class="meta">收藏于 {{item.timeLabel}}</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </block>
+</view>

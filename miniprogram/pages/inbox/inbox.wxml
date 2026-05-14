@@ -1,0 +1,27 @@
+<view class="page">
+  <view wx:if="{{needLogin}}" class="gate">
+    <text class="gate-t">登录后查看新消息</text>
+    <button class="gate-btn" bindtap="goLogin">去登录</button>
+  </view>
+
+  <block wx:else>
+    <view wx:if="{{loading}}" class="hint">加载中…</view>
+    <view wx:elif="{{empty}}" class="empty">暂无会话。在详情页「发站内留言」可发起与对方就某条信息的对话。</view>
+    <view wx:else class="list">
+      <view
+        class="row"
+        wx:for="{{threads}}"
+        wx:key="_id"
+        data-id="{{item._id}}"
+        bindtap="openThread"
+      >
+        <view class="row-main">
+          <text class="title">{{item.listing_title_cache}}</text>
+          <text class="preview">{{item.last_message_body || '（无内容）'}}</text>
+          <text class="meta">对方尾号 {{item.other_openid_tail}} · {{item.listing_type === 'request' ? '宠主需求' : '寄养家庭'}}</text>
+        </view>
+        <view wx:if="{{item.unread > 0}}" class="badge">{{item.unread > 99 ? '99+' : item.unread}}</view>
+      </view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>骨架屏状态</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="screen p-4">
+    <div class="notch"></div>
+    <div class="status-bar"><span class="font-semibold">9:41</span><div class="status-icons"><span>5G</span><span class="icon-dot"></span><span class="icon-dot"></span><span>87%</span></div></div>
+    <div class="space-y-3 pt-4">
+      <div class="td-card p-3">
+        <div class="skeleton h-4 w-2/3"></div>
+        <div class="skeleton h-20 w-full mt-3"></div>
+        <div class="skeleton h-3 w-5/6 mt-3"></div>
+        <div class="skeleton h-9 w-full mt-3"></div>
+      </div>
+      <div class="td-card p-3">
+        <div class="skeleton h-4 w-1/2"></div>
+        <div class="skeleton h-20 w-full mt-3"></div>
+        <div class="skeleton h-3 w-2/3 mt-3"></div>
+        <div class="skeleton h-9 w-full mt-3"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

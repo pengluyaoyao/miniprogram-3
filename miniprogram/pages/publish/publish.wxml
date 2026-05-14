@@ -1,0 +1,71 @@
+<view class="page">
+  <view class="status-bar">
+    <text class="time">9:41</text>
+    <text class="signal">5G 87%</text>
+  </view>
+
+  <view class="title">发布信息</view>
+
+  <view class="role-switch">
+    <view class="role-item {{role === 'owner' ? 'active' : ''}}" data-role="owner" bindtap="switchRole">宠物主</view>
+    <view class="role-item {{role === 'provider' ? 'active' : ''}}" data-role="provider" bindtap="switchRole">寄养家庭</view>
+  </view>
+
+  <view class="steps">
+    <text class="step {{step===1 ? 'step-active' : ''}}">1 基础信息</text>
+    <text class="step {{step===2 ? 'step-active' : ''}}">2 需求/服务</text>
+    <text class="step {{step===3 ? 'step-active' : ''}}">3 联系方式</text>
+  </view>
+
+  <view class="card" wx:if="{{step === 1}}">
+    <view wx:if="{{role === 'owner'}}">
+      <input class="input" placeholder="宠物昵称" value="{{owner.petName}}" data-role="owner" data-field="petName" bindinput="onFormField" />
+      <input class="input" placeholder="宠物类型（狗/猫）" value="{{owner.petType}}" data-role="owner" data-field="petType" bindinput="onFormField" />
+      <input class="input" placeholder="体型（小/中/大）" value="{{owner.size}}" data-role="owner" data-field="size" bindinput="onFormField" />
+      <view class="upload">上传宠物照片（后续接云存储）</view>
+    </view>
+    <view wx:else>
+      <input class="input" placeholder="寄养家庭名称" value="{{provider.displayName}}" data-role="provider" data-field="displayName" bindinput="onFormField" />
+      <input class="input" placeholder="服务经验（年，数字）" value="{{provider.years}}" data-role="provider" data-field="years" bindinput="onFormField" />
+      <input class="input" placeholder="可接收宠物（如：狗、猫，逗号分隔）" value="{{provider.acceptPets}}" data-role="provider" data-field="acceptPets" bindinput="onFormField" />
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{step === 2}}">
+    <view wx:if="{{role === 'owner'}}">
+      <input class="input" placeholder="寄养时间（如 6月1日-6月5日）" value="{{owner.periodText}}" data-role="owner" data-field="periodText" bindinput="onFormField" />
+      <input class="input" placeholder="期望距离（如 5km内）" value="{{owner.distanceText}}" data-role="owner" data-field="distanceText" bindinput="onFormField" />
+      <textarea class="textarea" placeholder="寄养需求说明" value="{{owner.description}}" data-role="owner" data-field="description" bindinput="onFormField" />
+    </view>
+    <view wx:else>
+      <input class="input" placeholder="服务项目（喂药、接送、视频，逗号分隔）" value="{{provider.servicesText}}" data-role="provider" data-field="servicesText" bindinput="onFormField" />
+      <textarea class="textarea" placeholder="寄养环境描述" value="{{provider.envDesc}}" data-role="provider" data-field="envDesc" bindinput="onFormField" />
+      <view class="upload">上传环境照片（后续接云存储）</view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{step === 3}}">
+    <view class="tip">手机号或微信号至少填写一项；提交将写入云数据库并出现在首页/地图。</view>
+    <button class="secondary-btn loc-btn" bindtap="onGetLocationTap">获取当前位置（用于地图标点）</button>
+    <text class="loc-hint" wx:if="{{lat !== null}}">已选位置：{{lat}}, {{lng}}</text>
+    <input class="input" type="number" placeholder="手机号" value="{{contactPhone}}" bindinput="onContactPhone" />
+    <input class="input" placeholder="微信号" value="{{contactWechat}}" bindinput="onContactWechat" />
+    <input class="input" placeholder="社交账号（选填）" value="{{contactSocial}}" bindinput="onContactSocial" />
+  </view>
+
+  <view class="footer-actions">
+    <button class="secondary-btn" bindtap="prevStep" wx:if="{{step > 1}}">上一步</button>
+    <button class="primary-btn" bindtap="nextStep" wx:if="{{step < 3}}">下一步</button>
+    <button class="primary-btn" loading="{{submitting}}" bindtap="submit" wx:if="{{step === 3}}">提交发布</button>
+  </view>
+
+  <view class="tabbar">
+    <view class="tab-item" bindtap="goHome">首页</view>
+    <view class="tab-item active" bindtap="goPublish">发布</view>
+    <view class="tab-item" bindtap="goMap">地图</view>
+    <view class="tab-item tab-with-badge" bindtap="goMy">
+      <text>我的</text>
+      <view class="tab-badge" wx:if="{{msgUnread > 0}}">{{msgUnread > 99 ? '99+' : msgUnread}}</view>
+    </view>
+  </view>
+</view>

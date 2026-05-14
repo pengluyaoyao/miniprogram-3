@@ -1,0 +1,9 @@
+{
+  "id": "contact_001",
+  "from_user_id": "user_001",
+  "to_user_id": "user_002",
+  "target_type": "provider_profile",
+  "target_id": "provider_001",
+  "contact_method": "phone",
+  "created_at": "2026-05-06T09:00:00+08:00"
+}

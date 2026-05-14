@@ -1,0 +1,9 @@
+{
+  "name": "getListingDetail",
+  "version": "1.0.0",
+  "description": "按 id 与类型拉取已发布单条寄养家庭或宠主需求",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

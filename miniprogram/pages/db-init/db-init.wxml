@@ -1,0 +1,5 @@
+<view class="wrap">
+  <text class="tip">仅开发使用：调用云函数 initDatabase，在云数据库创建 10 个集合。</text>
+  <button class="btn" loading="{{loading}}" bindtap="runInit">执行初始化（confirm: INIT_DB_V1）</button>
+  <text class="log" selectable>{{log}}</text>
+</view>

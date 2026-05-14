@@ -1,0 +1,9 @@
+{
+  "name": "addFavorite",
+  "version": "1.0.0",
+  "description": "收藏一条已发布信息（去重）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,27 @@
+<view class="page">
+  <view wx:if="{{needLogin}}" class="gate">
+    <text class="gate-t">登录后查看您发布的寄养需求</text>
+    <button class="gate-btn" bindtap="goLogin">去登录</button>
+  </view>
+
+  <block wx:else>
+    <view wx:if="{{loading}}" class="hint">加载中…</view>
+    <view wx:elif="{{empty}}" class="empty">您还没有发布宠主寄养需求。请到「发布」选择宠物主人身份填写并提交。</view>
+    <view wx:else class="list">
+      <view
+        class="row"
+        wx:for="{{rows}}"
+        wx:key="_id"
+        data-id="{{item._id}}"
+        bindtap="openDetail"
+      >
+        <view class="row-main">
+          <text class="title">{{item.title}}</text>
+          <text class="preview">{{item.sub}}</text>
+          <text wx:if="{{item.timeLabel}}" class="meta">提交时间 {{item.timeLabel}}</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </block>
+</view>

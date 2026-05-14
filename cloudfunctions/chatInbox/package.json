@@ -1,0 +1,9 @@
+{
+  "name": "chatInbox",
+  "version": "1.0.0",
+  "description": "收件箱会话列表与未读总数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

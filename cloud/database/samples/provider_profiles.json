@@ -1,0 +1,23 @@
+{
+  "id": "provider_001",
+  "user_id": "user_002",
+  "years_experience": 3,
+  "pet_types": ["dog", "cat"],
+  "accepted_sizes": ["small", "medium"],
+  "max_pets": 2,
+  "walks_per_day": 2,
+  "has_private_room": true,
+  "has_yard": false,
+  "has_other_pets": true,
+  "has_children": false,
+  "supports_medication": true,
+  "supports_pickup": false,
+  "service_tags": ["小型犬", "可喂药", "独立空间"],
+  "environment_photos": ["cloud://xxx/room1.jpg"],
+  "price_description": "价格线下沟通确认，平台不收款",
+  "lat": 31.2304,
+  "lng": 121.4737,
+  "profile_completeness": 92,
+  "status": "published",
+  "created_at": "2026-05-06T09:00:00+08:00"
+}

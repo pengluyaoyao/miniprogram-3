@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>宠主首页</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="screen p-4">
+    <div class="notch"></div>
+    <div class="status-bar">
+      <span class="font-semibold">9:41</span>
+      <div class="status-icons"><span>5G</span><span class="icon-dot"></span><span class="icon-dot"></span><span>87%</span></div>
+    </div>
+    <div class="pt-4 pb-24">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold">附近寄养家庭</h2>
+        <span class="text-sm text-slate-500">3.2km内</span>
+      </div>
+      <div class="td-card p-3 mt-3 bg-orange-50 border-orange-100">
+        <p class="text-sm text-orange-700">你还可以免费查看 2 个完整信息</p>
+      </div>
+      <div class="space-y-3 mt-3">
+        <div class="td-card p-3">
+          <div class="flex justify-between"><p class="font-semibold">甜甜阿姨寄养</p><p class="text-sm text-slate-500">1.1km</p></div>
+          <div class="grid grid-cols-3 gap-2 mt-2">
+            <div class="h-16 rounded-xl bg-orange-100 flex items-center justify-center text-[10px] text-orange-700">客厅环境</div>
+            <div class="h-16 rounded-xl bg-sky-100 flex items-center justify-center text-[10px] text-sky-700">活动区域</div>
+            <div class="h-16 rounded-xl bg-emerald-100 flex items-center justify-center text-[10px] text-emerald-700">照护日常</div>
+          </div>
+          <div class="flex gap-2 mt-2"><span class="td-tag bg-sky-100 text-sky-700">小型犬</span><span class="td-tag bg-emerald-100 text-emerald-700">喂药</span><span class="td-tag bg-amber-100 text-amber-700">接送</span></div>
+          <button class="w-full mt-3 py-2 td-btn-primary">查看详情 / 联系TA</button>
+        </div>
+        <div class="td-card p-3">
+          <div class="flex justify-between"><p class="font-semibold">萌宠之家</p><p class="text-sm text-slate-500">2.4km</p></div>
+          <div class="grid grid-cols-3 gap-2 mt-2">
+            <div class="h-16 rounded-xl bg-violet-100 flex items-center justify-center text-[10px] text-violet-700">猫咪房间</div>
+            <div class="h-16 rounded-xl bg-amber-100 flex items-center justify-center text-[10px] text-amber-700">休息区</div>
+            <div class="h-16 rounded-xl bg-cyan-100 flex items-center justify-center text-[10px] text-cyan-700">喂食区</div>
+          </div>
+          <div class="flex gap-2 mt-2"><span class="td-tag bg-sky-100 text-sky-700">猫咪优先</span><span class="td-tag bg-violet-100 text-violet-700">独立空间</span></div>
+          <button class="w-full mt-3 py-2 td-btn-secondary">查看详情</button>
+        </div>
+      </div>
+    </div>
+    <div class="tabbar absolute bottom-0 left-0 w-full flex justify-around py-3 text-xs bg-white">
+      <span class="text-orange-500 font-semibold">首页</span><span>发布</span><span>地图</span><span>我的</span>
+    </div>
+  </div>
+</body>
+</html>

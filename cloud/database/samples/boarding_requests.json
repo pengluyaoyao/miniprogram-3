@@ -1,0 +1,15 @@
+{
+  "id": "request_001",
+  "owner_id": "user_001",
+  "pet_id": "pet_001",
+  "boarding_period": "short_term",
+  "start_date": "2026-06-01",
+  "end_date": "2026-06-05",
+  "location_city": "上海市",
+  "lat": 31.2304,
+  "lng": 121.4737,
+  "requirements": ["每天遛狗2次", "不可与大型犬同住"],
+  "description": "希望找附近家庭寄养",
+  "status": "published",
+  "created_at": "2026-05-06T09:00:00+08:00"
+}

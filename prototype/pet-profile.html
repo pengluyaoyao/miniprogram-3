@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>宠物档案编辑</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="screen p-4">
+    <div class="notch"></div>
+    <div class="pt-4">
+      <h2 class="text-lg font-bold">宠物档案填写</h2>
+      <div class="td-card p-4 mt-3 space-y-3">
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="宠物昵称：奶糖" />
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="宠物类型：狗" />
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="体型：小型" />
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="免疫情况：已免疫" />
+        <div class="rounded-xl bg-amber-50 border border-amber-200 p-2 text-xs text-amber-700">
+          联系方式至少填写一种：手机号或微信号
+        </div>
+        <button class="w-full py-3 td-btn-primary">一键获取手机号（微信授权）</button>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm text-slate-700">
+          已授权手机号：138****0000
+        </div>
+        <button class="w-full py-2 td-btn-secondary">未授权？手动填写手机号</button>
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="微信号：pet_owner_88" />
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="社交媒体账号（选填）：小红书@奶糖成长日记" />
+        <div>
+          <p class="text-sm text-slate-600 mb-2">宠物照片（最多 6 张）</p>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="h-20 rounded-xl bg-orange-100 flex items-center justify-center text-xs text-orange-700">奶糖正脸</div>
+            <div class="h-20 rounded-xl bg-sky-100 flex items-center justify-center text-xs text-sky-700">日常玩耍</div>
+            <div class="h-20 rounded-xl border border-dashed border-slate-300 flex items-center justify-center text-xs text-slate-500">+ 上传</div>
+          </div>
+        </div>
+        <textarea class="w-full border border-slate-200 rounded-xl p-3 text-sm h-24">特殊照护：每日喂药1次，不能吃鸡肉。</textarea>
+      </div>
+      <button class="w-full mt-4 py-3 td-btn-primary">保存并继续发布</button>
+    </div>
+  </div>
+</body>
+</html>

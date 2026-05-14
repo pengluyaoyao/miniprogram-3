@@ -1,0 +1,21 @@
+<view class="page">
+  <view wx:if="{{needLogin}}" class="gate">
+    <text class="gate-t">登录后查看举报记录</text>
+    <button class="gate-btn" bindtap="goLogin">去登录</button>
+  </view>
+
+  <block wx:else>
+    <view wx:if="{{loading}}" class="hint">加载中…</view>
+    <view wx:elif="{{empty}}" class="empty">暂无举报记录。在详情页点击「举报」可提交平台审核。</view>
+    <view wx:else class="list">
+      <view class="row static" wx:for="{{rows}}" wx:key="_id">
+        <view class="row-main">
+          <text class="title">{{item.listing_title}}</text>
+          <text class="preview">类型：{{item.reason}}</text>
+          <text class="preview detail">{{item.detail}}</text>
+          <text class="meta">状态：{{item.status === 'submitted' ? '已提交' : item.status}} · {{item.timeLabel}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

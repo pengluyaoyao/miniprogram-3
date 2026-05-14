@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>地图页</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="screen p-4">
+    <div class="notch"></div>
+    <div class="pt-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold">附近地图</h2>
+        <div class="text-xs"><span class="td-tag bg-orange-100 text-orange-700">寄养家庭</span><span class="td-tag bg-slate-100 text-slate-600 ml-1">寄养需求</span></div>
+      </div>
+      <div class="td-card mt-3 h-[540px] p-3 bg-gradient-to-br from-cyan-100 to-blue-100 relative">
+        <div class="absolute top-20 left-20 w-4 h-4 rounded-full bg-orange-500"></div>
+        <div class="absolute top-36 right-24 w-4 h-4 rounded-full bg-orange-500"></div>
+        <div class="absolute bottom-40 left-32 w-4 h-4 rounded-full bg-orange-500"></div>
+        <p class="text-xs text-slate-500">仅展示模糊位置（街道/小区附近）</p>
+      </div>
+      <div class="td-card mt-3 p-3">
+        <p class="font-semibold">甜甜阿姨寄养 · 1.1km</p>
+        <p class="text-sm text-slate-600 mt-1">支持喂药 / 每日视频反馈 / 可接送</p>
+        <button class="w-full py-2 mt-3 td-btn-primary">查看详情</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

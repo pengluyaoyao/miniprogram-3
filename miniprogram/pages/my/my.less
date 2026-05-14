@@ -1,0 +1,184 @@
+.page {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 24rpx 24rpx 130rpx;
+  box-sizing: border-box;
+}
+
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  color: #0f172a;
+  font-size: 22rpx;
+  margin-bottom: 16rpx;
+}
+
+.title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.login-gate {
+  margin-top: 24rpx;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24rpx;
+  padding: 40rpx;
+}
+
+.gate-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.gate-desc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.gate-btn {
+  margin-top: 32rpx;
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  color: #fff;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+}
+
+.profile-card,
+.menu-list,
+.inbox-entry {
+  margin-top: 16rpx;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20rpx;
+}
+
+.profile-card {
+  padding: 20rpx;
+}
+
+.name {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.role {
+  display: block;
+  margin-top: 6rpx;
+  color: #64748b;
+  font-size: 24rpx;
+}
+
+.inbox-entry {
+  position: relative;
+  padding: 24rpx 56rpx 24rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.inbox-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.inbox-sub {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #64748b;
+}
+
+.inbox-badge {
+  position: absolute;
+  right: 48rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  min-width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  padding: 0 10rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #fff;
+  background: #ef4444;
+  border-radius: 999rpx;
+}
+
+.inbox-arrow {
+  position: absolute;
+  right: 20rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 36rpx;
+  color: #cbd5e1;
+}
+
+.menu-item {
+  padding: 20rpx;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 26rpx;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.logout-btn {
+  margin-top: 28rpx;
+  width: 100%;
+  background: #fff;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+}
+
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  padding: 14rpx 0 calc(env(safe-area-inset-bottom) + 14rpx);
+}
+
+.tab-item {
+  color: #64748b;
+  font-size: 22rpx;
+}
+
+.tab-item.active {
+  color: #f97316;
+  font-weight: 600;
+}
+
+.tab-with-badge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tab-badge {
+  position: absolute;
+  top: -10rpx;
+  right: -18rpx;
+  min-width: 28rpx;
+  padding: 0 6rpx;
+  height: 28rpx;
+  line-height: 28rpx;
+  font-size: 18rpx;
+  color: #fff;
+  background: #ef4444;
+  border-radius: 999rpx;
+  text-align: center;
+}

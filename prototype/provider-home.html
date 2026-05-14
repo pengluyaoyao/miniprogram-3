@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>寄养家庭首页</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="screen p-4">
+    <div class="notch"></div>
+    <div class="status-bar">
+      <span class="font-semibold">9:41</span>
+      <div class="status-icons"><span>5G</span><span class="icon-dot"></span><span class="icon-dot"></span><span>87%</span></div>
+    </div>
+    <div class="pt-4 pb-24">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold">附近宠主需求</h2>
+        <span class="text-sm text-slate-500">切换：狗/猫</span>
+      </div>
+      <div class="space-y-3 mt-3">
+        <div class="td-card p-3">
+          <div class="flex gap-3">
+            <div class="w-16 h-16 rounded-xl bg-orange-100 flex items-center justify-center text-[10px] text-orange-700">宠物照</div>
+            <div class="flex-1">
+              <div class="flex justify-between"><p class="font-semibold">柯基 · 短期寄养</p><p class="text-sm text-slate-500">0.9km</p></div>
+              <p class="text-sm text-slate-600 mt-2">5月10日-5月12日，需要每天遛狗2次。</p>
+            </div>
+          </div>
+          <button class="w-full mt-3 py-2 td-btn-primary">查看需求详情</button>
+        </div>
+        <div class="td-card p-3">
+          <div class="flex gap-3">
+            <div class="w-16 h-16 rounded-xl bg-sky-100 flex items-center justify-center text-[10px] text-sky-700">宠物照</div>
+            <div class="flex-1">
+              <div class="flex justify-between"><p class="font-semibold">英短猫 · 长期寄养</p><p class="text-sm text-slate-500">3.5km</p></div>
+              <p class="text-sm text-slate-600 mt-2">可自带猫粮，要求安静独立空间。</p>
+            </div>
+          </div>
+          <button class="w-full mt-3 py-2 td-btn-secondary">查看需求详情</button>
+        </div>
+      </div>
+    </div>
+    <div class="tabbar absolute bottom-0 left-0 w-full flex justify-around py-3 text-xs bg-white">
+      <span class="text-orange-500 font-semibold">首页</span><span>发布</span><span>地图</span><span>我的</span>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<view class="page">
+  <view wx:if="{{needLogin}}" class="gate">
+    <text class="gate-t">登录后提交举报</text>
+    <button class="gate-btn" bindtap="goLogin">去登录</button>
+  </view>
+
+  <block wx:else>
+    <view class="card">
+      <text class="label">举报对象</text>
+      <text class="value">{{listingTitle || '该条信息'}}</text>
+    </view>
+
+    <view class="card">
+      <text class="label">举报类型</text>
+      <picker mode="selector" range="{{reasons}}" value="{{reasonIndex}}" bindchange="onReasonChange">
+        <view class="picker">{{reasons[reasonIndex]}}</view>
+      </picker>
+    </view>
+
+    <view class="card">
+      <text class="label">说明（必填）</text>
+      <textarea
+        class="area"
+        placeholder="请简要描述情况，便于平台核查"
+        maxlength="500"
+        value="{{detail}}"
+        bindinput="onDetail"
+      />
+    </view>
+
+    <view class="risk">请如实填写。恶意举报可能影响您的账号使用。</view>
+
+    <button class="submit" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">提交举报</button>
+  </block>
+</view>

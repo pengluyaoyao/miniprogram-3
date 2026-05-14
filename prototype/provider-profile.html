@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>寄养资料编辑</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="screen p-4">
+    <div class="notch"></div>
+    <div class="pt-4">
+      <h2 class="text-lg font-bold">寄养家庭资料</h2>
+      <div class="td-card p-4 mt-3 space-y-3">
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="服务经验：4年" />
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="可接收宠物：小型犬/猫" />
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="服务项目：喂药、接送、视频反馈" />
+        <div class="rounded-xl bg-amber-50 border border-amber-200 p-2 text-xs text-amber-700">
+          联系方式至少填写一种：手机号或微信号
+        </div>
+        <button class="w-full py-3 td-btn-primary">一键获取手机号（微信授权）</button>
+        <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-sm text-slate-700">
+          已授权手机号：139****5678
+        </div>
+        <button class="w-full py-2 td-btn-secondary">未授权？手动填写手机号</button>
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="微信号：host_family_sh" />
+        <input class="w-full border border-slate-200 rounded-xl p-3 text-sm" value="社交媒体账号（选填）：抖音@甜甜阿姨寄养" />
+        <textarea class="w-full border border-slate-200 rounded-xl p-3 text-sm h-24">寄养环境描述：有独立空间，阳台封窗，全天有人看护。</textarea>
+        <div class="border border-dashed rounded-xl p-4 text-sm text-slate-500 text-center">上传环境照片</div>
+      </div>
+      <button class="w-full mt-4 py-3 td-btn-primary">提交审核并发布</button>
+    </div>
+  </div>
+</body>
+</html>

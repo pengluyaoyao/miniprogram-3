@@ -1,0 +1,44 @@
+<view class="page">
+  <view wx:if="{{loadError}}" class="err">{{loadError}}</view>
+
+  <view wx:elif="{{selfOwner}}" class="err">{{loadError}}</view>
+
+  <block wx:else>
+    <view class="tip">
+      与对方就本条信息沟通。平台不担保交易，请注意隐私与安全。
+    </view>
+
+    <scroll-view
+      class="msg-scroll"
+      scroll-y
+      scroll-into-view="{{scrollInto}}"
+      scroll-with-animation
+    >
+      <view wx:if="{{messages.length === 0}}" class="empty">暂无留言，发送第一条开始对话</view>
+      <view
+        wx:for="{{messages}}"
+        wx:key="_id"
+        id="msg-{{item._id}}"
+        class="row {{item.mine ? 'mine' : 'other'}}"
+      >
+        <view class="bubble">
+          <text class="body">{{item.body}}</text>
+          <text class="time">{{item.timeLabel}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="composer">
+      <textarea
+        class="input"
+        placeholder="输入留言内容"
+        value="{{inputValue}}"
+        maxlength="800"
+        auto-height
+        disabled="{{selfOwner}}"
+        bindinput="onInput"
+      />
+      <button class="send" loading="{{sending}}" disabled="{{selfOwner}}" bindtap="send">发送</button>
+    </view>
+  </block>
+</view>

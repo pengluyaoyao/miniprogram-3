@@ -1,0 +1,12 @@
+{
+  "id": "entitlement_001",
+  "user_id": "user_001",
+  "role": "owner",
+  "entitlement_type": "daily_view_pass",
+  "price_cents": 800,
+  "currency": "CNY",
+  "starts_at": "2026-05-06T09:00:00+08:00",
+  "expires_at": "2026-05-07T09:00:00+08:00",
+  "status": "active",
+  "created_at": "2026-05-06T09:00:00+08:00"
+}

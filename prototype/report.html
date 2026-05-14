@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>举报页</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="screen p-4">
+    <div class="notch"></div>
+    <div class="pt-4">
+      <h2 class="text-lg font-bold">举报信息</h2>
+      <div class="td-card p-4 mt-3 space-y-3">
+        <select class="w-full border border-slate-200 rounded-xl p-3 text-sm">
+          <option>请选择举报原因</option>
+          <option>虚假信息</option>
+          <option>骚扰/不当言论</option>
+          <option>联系方式异常</option>
+        </select>
+        <textarea class="w-full border border-slate-200 rounded-xl p-3 text-sm h-28">补充说明（选填）</textarea>
+        <div class="border border-dashed rounded-xl p-4 text-sm text-slate-500 text-center">上传截图凭证（最多3张）</div>
+      </div>
+      <button class="w-full mt-4 py-3 td-btn-primary">提交举报</button>
+      <p class="text-xs text-slate-500 mt-3">平台将进行基础审核，举报结果会在“我的-举报记录”中反馈。</p>
+    </div>
+  </div>
+</body>
+</html>

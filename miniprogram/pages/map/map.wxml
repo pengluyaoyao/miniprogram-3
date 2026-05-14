@@ -1,0 +1,66 @@
+<view class="page">
+  <view class="status-bar">
+    <text class="time">9:41</text>
+    <text class="signal">5G 87%</text>
+  </view>
+
+  <view class="header-row">
+    <text class="title">附近地图</text>
+    <text class="hint">非高精度 · 约数百米网格</text>
+  </view>
+
+  <view class="type-switch">
+    <view class="type-item {{mapType === 'provider' ? 'active' : ''}}" data-type="provider" bindtap="switchType">
+      寄养家庭
+    </view>
+    <view class="type-item {{mapType === 'request' ? 'active' : ''}}" data-type="request" bindtap="switchType">
+      宠主需求
+    </view>
+  </view>
+
+  <map
+    class="map"
+    latitude="{{lat}}"
+    longitude="{{lng}}"
+    scale="14"
+    markers="{{markers}}"
+    show-location
+    bindmarkertap="onMarkerTap"
+  />
+
+  <view class="list-panel" wx:if="{{listRows.length > 0}}">
+    <text class="list-heading">当前 {{listRows.length}} 条</text>
+    <scroll-view scroll-y class="list-scroll">
+      <view
+        wx:for="{{listRows}}"
+        wx:key="listingId"
+        class="list-row {{item.selected ? 'selected' : ''}}"
+        data-mid="{{item.markerId}}"
+        bindtap="onListRowTap"
+      >
+        <view class="row-inner">
+          <text class="row-title">{{item.title}}</text>
+          <text class="row-sub">{{item.subtitle}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="bottom-card">
+    <view>
+      <text class="card-title">{{previewTitle}}</text>
+      <text class="card-desc">{{previewDesc}}</text>
+    </view>
+    <button class="card-btn" bindtap="goDetail">查看详情</button>
+  </view>
+
+  <view class="tabbar">
+    <view class="tab-item" bindtap="goHome">首页</view>
+    <view class="tab-item" bindtap="goPublish">发布</view>
+    <view class="tab-item active" bindtap="goMap">地图</view>
+    <view class="tab-item tab-with-badge" bindtap="goMy">
+      <text>我的</text>
+      <view class="tab-badge" wx:if="{{msgUnread > 0}}">{{msgUnread > 99 ? '99+' : msgUnread}}</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,10 @@
+{
+  "id": "view_001",
+  "viewer_id": "user_001",
+  "viewer_role": "owner",
+  "target_type": "provider_profile",
+  "target_id": "provider_001",
+  "is_free_quota_used": true,
+  "is_paid_entitlement_used": false,
+  "created_at": "2026-05-06T09:00:00+08:00"
+}

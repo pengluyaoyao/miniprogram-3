@@ -6,6 +6,7 @@ dist
 .wxml
 
 node_modules
+.cloudbase/
 .env
 .env.local 
 .env.development.local

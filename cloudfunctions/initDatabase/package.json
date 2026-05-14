@@ -1,9 +1,10 @@
 {
   "name": "initDatabase",
   "version": "1.0.0",
-  "description": "初始化数据库云函数",
+  "description": "一次性创建 PRD 第八节所列云数据库集合",
   "main": "index.js",
   "dependencies": {
+    "@cloudbase/node-sdk": "^3.7.0",
     "wx-server-sdk": "~2.6.3"
   }
 }

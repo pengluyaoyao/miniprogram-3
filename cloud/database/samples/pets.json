@@ -1,0 +1,18 @@
+{
+  "id": "pet_001",
+  "owner_id": "user_001",
+  "name": "Lucky",
+  "pet_type": "dog",
+  "breed": "柯基",
+  "age": 3,
+  "gender": "male",
+  "weight_kg": 12,
+  "health_condition": "健康",
+  "immunization_status": "已免疫",
+  "dewormed": true,
+  "neutered": true,
+  "personality_tags": ["亲人", "活泼"],
+  "special_needs": "无",
+  "photos": ["cloud://xxx/pet1.jpg"],
+  "created_at": "2026-05-06T09:00:00+08:00"
+}

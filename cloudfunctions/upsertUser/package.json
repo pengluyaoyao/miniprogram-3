@@ -1,0 +1,9 @@
+{
+  "name": "upsertUser",
+  "version": "1.0.0",
+  "description": "登录时按 openid 写入/更新 users 集合",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -18,5 +18,18 @@
     "bigPackageSizeSupport": false,
     "checkInvalidKey": true,
     "ignoreDevUnusedFiles": true
+  },
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "pages/db-init/db-init",
+          "pathName": "pages/db-init/db-init",
+          "query": "",
+          "scene": null,
+          "launchMode": "default"
+        }
+      ]
+    }
   }
 }

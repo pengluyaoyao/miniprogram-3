@@ -1,0 +1,9 @@
+{
+  "name": "chatMarkRead",
+  "version": "1.0.0",
+  "description": "将会话未读清零",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

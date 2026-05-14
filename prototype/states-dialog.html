@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>弹窗层状态</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="screen p-4 relative">
+    <div class="notch"></div>
+    <div class="status-bar"><span class="font-semibold">9:41</span><div class="status-icons"><span>5G</span><span class="icon-dot"></span><span class="icon-dot"></span><span>87%</span></div></div>
+    <div class="pt-4">
+      <h2 class="text-lg font-bold">查看完整信息并联系</h2>
+      <div class="td-card p-4 mt-3"><p class="text-sm text-slate-600">页面内容示意...</p></div>
+    </div>
+    <div class="dialog-overlay">
+      <div class="td-card p-4 w-full">
+        <p class="font-semibold">联系前提示</p>
+        <p class="text-sm text-slate-600 mt-2">平台仅提供信息对接，不参与交易、担保或履约。请核验身份、费用与责任边界。</p>
+        <div class="grid grid-cols-2 gap-2 mt-4">
+          <button class="py-2 td-btn-secondary">取消</button>
+          <button class="py-2 td-btn-primary">我已了解，继续联系</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
