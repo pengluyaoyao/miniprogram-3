@@ -7,7 +7,7 @@
 | `initDatabase` | 创建 PRD 第八节 10 个数据库集合 |
 | `upsertUser` | 登录时按 OPENID 写入/更新 `users` |
 | `publishListing` | 发布页提交：写入 `provider_profiles` 或 `boarding_requests`（`status: published`） |
-| `getPublishedFeed` | 首页/地图：拉取已发布的寄养家庭与宠主需求 |
+| `getPublishedFeed` | 首页/地图：传 `lat`/`lng` → 50km 内按距离排序；传 `cityQuery` → 按 `location_city` 筛选（含无坐标记录）；均未传 → 各最多 50 条 |
 | `getListingDetail` | 详情页：按 `id` + `listingType` 拉取单条已发布记录 |
 | `getMyBoardingRequests` | 「我的寄养需求」：当前用户 `boarding_requests` |
 | `getMyFavorites` | 「我的收藏」：当前用户 `favorites` |

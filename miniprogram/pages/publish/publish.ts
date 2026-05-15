@@ -12,14 +12,33 @@ const emptyOwner = () => ({
   periodText: '',
   distanceText: '',
   description: '',
+  petPhotos: [] as string[],
 })
 
-const emptyProvider = () => ({
+type ProviderForm = {
+  displayName: string
+  years: string
+  acceptPets: string
+  cityDistrict: string
+  svcMed: boolean
+  svcPickup: boolean
+  svcVideo: boolean
+  svcCamera: boolean
+  otherServices: string
+  envPhotos: string[]
+}
+
+const emptyProvider = (): ProviderForm => ({
   displayName: '',
   years: '',
   acceptPets: '',
-  servicesText: '',
-  envDesc: '',
+  cityDistrict: '',
+  svcMed: false,
+  svcPickup: false,
+  svcVideo: false,
+  svcCamera: false,
+  otherServices: '',
+  envPhotos: [],
 })
 
 Page({
@@ -79,6 +98,108 @@ Page({
     }
   },
 
+  toggleProviderSvc(e: WechatMiniprogram.BaseEvent) {
+    const field = (e.currentTarget.dataset as { field?: keyof ProviderForm }).field
+    if (!field || !['svcMed', 'svcPickup', 'svcVideo', 'svcCamera'].includes(field as string)) {
+      return
+    }
+    const p = this.data.provider
+    const cur = !!p[field as keyof ProviderForm]
+    this.setData({ [`provider.${field}`]: !cur })
+  },
+
+  chooseEnvPhotos() {
+    const prov = this.data.provider
+    const remain = 9 - prov.envPhotos.length
+    if (remain <= 0) {
+      wx.showToast({ title: '最多 9 张', icon: 'none' })
+      return
+    }
+    wx.chooseMedia({
+      count: remain,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const paths = res.tempFiles.map((f) => f.tempFilePath)
+        wx.showLoading({ title: '上传中', mask: true })
+        const uploads = paths.map((filePath, i) =>
+          wx.cloud.uploadFile({
+            cloudPath: `provider_env/${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}.jpg`,
+            filePath,
+          })
+        )
+        Promise.all(uploads)
+          .then((results) => {
+            const ids = results.map((r) => r.fileID)
+            this.setData({ 'provider.envPhotos': [...prov.envPhotos, ...ids] })
+            wx.showToast({ title: '已上传', icon: 'success' })
+          })
+          .catch(() => {
+            wx.showToast({ title: '上传失败，请检查云存储权限', icon: 'none' })
+          })
+          .finally(() => {
+            wx.hideLoading()
+          })
+      },
+    })
+  },
+
+  removeEnvPhoto(e: WechatMiniprogram.BaseEvent) {
+    const idx = Number((e.currentTarget.dataset as { idx?: string }).idx)
+    if (!Number.isFinite(idx) || idx < 0) {
+      return
+    }
+    const next = this.data.provider.envPhotos.filter((_, i) => i !== idx)
+    this.setData({ 'provider.envPhotos': next })
+  },
+
+  choosePetPhotos() {
+    const owner = this.data.owner as { petPhotos?: string[] }
+    const cur = owner.petPhotos || []
+    const remain = 3 - cur.length
+    if (remain <= 0) {
+      wx.showToast({ title: '最多 3 张', icon: 'none' })
+      return
+    }
+    wx.chooseMedia({
+      count: remain,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const paths = res.tempFiles.map((f) => f.tempFilePath)
+        wx.showLoading({ title: '上传中', mask: true })
+        const uploads = paths.map((filePath, i) =>
+          wx.cloud.uploadFile({
+            cloudPath: `owner_pet/${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}.jpg`,
+            filePath,
+          })
+        )
+        Promise.all(uploads)
+          .then((results) => {
+            const ids = results.map((r) => r.fileID)
+            this.setData({ 'owner.petPhotos': [...cur, ...ids] })
+            wx.showToast({ title: '已上传', icon: 'success' })
+          })
+          .catch(() => {
+            wx.showToast({ title: '上传失败，请检查云存储权限', icon: 'none' })
+          })
+          .finally(() => {
+            wx.hideLoading()
+          })
+      },
+    })
+  },
+
+  removePetPhoto(e: WechatMiniprogram.BaseEvent) {
+    const idx = Number((e.currentTarget.dataset as { idx?: string }).idx)
+    if (!Number.isFinite(idx) || idx < 0) {
+      return
+    }
+    const cur = (this.data.owner as { petPhotos: string[] }).petPhotos || []
+    const next = cur.filter((_, i) => i !== idx)
+    this.setData({ 'owner.petPhotos': next })
+  },
+
   onContactPhone(e: WechatMiniprogram.Input) {
     this.setData({ contactPhone: e.detail.value })
   },
@@ -107,33 +228,46 @@ Page({
     }
     const phone = this.data.contactPhone.trim()
     const wechat = this.data.contactWechat.trim()
-    if (!phone && !wechat) {
-      wx.showToast({ title: '请填写手机号或微信号', icon: 'none' })
-      return
-    }
 
     const lat = this.data.lat
     const lng = this.data.lng
 
     const run = (latNum: number, lngNum: number) => {
       this.setData({ submitting: true })
-      const payload: Record<string, unknown> = {
+      const base = {
         role: this.data.role,
         lat: latNum,
         lng: lngNum,
-        owner: {
-          ...this.data.owner,
-          phone,
-          wechatId: wechat,
-          social: this.data.contactSocial.trim(),
-        },
-        provider: {
-          ...this.data.provider,
-          phone,
-          wechatId: wechat,
-          social: this.data.contactSocial.trim(),
-        },
       }
+      const payload: Record<string, unknown> =
+        this.data.role === 'provider'
+          ? {
+              ...base,
+              provider: {
+                displayName: this.data.provider.displayName,
+                years: this.data.provider.years,
+                acceptPets: this.data.provider.acceptPets,
+                cityDistrict: this.data.provider.cityDistrict,
+                svcMed: this.data.provider.svcMed,
+                svcPickup: this.data.provider.svcPickup,
+                svcVideo: this.data.provider.svcVideo,
+                svcCamera: this.data.provider.svcCamera,
+                otherServices: this.data.provider.otherServices,
+                environmentPhotos: this.data.provider.envPhotos,
+                phone,
+                wechatId: wechat,
+                social: this.data.contactSocial.trim(),
+              },
+            }
+          : {
+              ...base,
+              owner: {
+                ...this.data.owner,
+                phone,
+                wechatId: wechat,
+                social: this.data.contactSocial.trim(),
+              },
+            }
       callCloud('publishListing', payload)
         .then((res) => {
           const r = res.result as { ok?: boolean; errMsg?: string }

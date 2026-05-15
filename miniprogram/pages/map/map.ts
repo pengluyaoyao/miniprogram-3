@@ -1,8 +1,8 @@
-import { callCloud } from '../../utils/cloud'
-import { getLocationCoarse, quantizeLocationRough } from '../../utils/location'
+import { loadPublishedFeed, feedLocationHint, mapCenterFromDocs, type FeedCloudDoc } from '../../utils/feedLoad'
+import { quantizeLocationRough } from '../../utils/location'
 import { refreshMessageBadge } from '../../utils/inboxBadge'
 
-type CloudDoc = Record<string, unknown>
+type CloudDoc = FeedCloudDoc
 
 const DEFAULT_LAT = 31.2304
 const DEFAULT_LNG = 121.4737
@@ -71,7 +71,9 @@ function buildEntries(docs: CloudDoc[], kind: 'provider' | 'request', baseLat: n
       title = `${(doc.pet_name as string) || '宠物'} · ${(doc.pet_type as string) || ''}`.slice(0, 18)
       desc = ((doc.description as string) || (doc.date_range_text as string) || '').slice(0, 80)
     }
-    return { doc, idStr, rawLat, rawLng, title, desc, kind }
+    const dist = String(doc.distance_label || '').trim()
+    const subtitleBase = dist ? `${dist} · ${desc || '查看详情'}` : desc || '查看详情'
+    return { doc, idStr, rawLat, rawLng, title, desc: subtitleBase, kind }
   })
 }
 
@@ -156,10 +158,13 @@ Page({
     previewDesc: '展示已发布内容摘要',
     rawProviders: [] as CloudDoc[],
     rawRequests: [] as CloudDoc[],
+    cityInput: '',
+    activeCityQuery: '',
+    searchMode: 'all' as 'gps' | 'city' | 'all',
+    feedLocated: false,
+    locationHint: '未定位，可搜索市区',
     msgUnread: 0,
   },
-
-  _didApplyUserCenter: false,
 
   onLoad() {
     this.loadFeed()
@@ -170,40 +175,58 @@ Page({
     this.loadFeed()
   },
 
-  tryApplyUserMapCenter() {
-    if (this._didApplyUserCenter) {
-      return
-    }
-    this._didApplyUserCenter = true
-    getLocationCoarse()
-      .then((res) => {
-        const q = quantizeLocationRough(res.latitude, res.longitude)
-        this.setData({ lat: q.lat, lng: q.lng })
-      })
-      .catch(() => {
-        // 未授权等：保持默认中心
-      })
+  onCityInput(e: WechatMiniprogram.Input) {
+    this.setData({ cityInput: e.detail.value })
+  },
+
+  onCitySearch() {
+    const q = this.data.cityInput.trim()
+    this.setData({ activeCityQuery: q }, () => this.loadFeed())
+  },
+
+  onClearCity() {
+    this.setData({ cityInput: '', activeCityQuery: '' }, () => this.loadFeed())
   },
 
   loadFeed() {
-    callCloud('getPublishedFeed')
-      .then((res) => {
-        const r = res.result as {
-          ok?: boolean
-          providers?: CloudDoc[]
-          requests?: CloudDoc[]
+    const cityQuery = this.data.activeCityQuery || undefined
+    loadPublishedFeed({ cityQuery })
+      .then((r) => {
+        if (!r.ok) {
+          this.setData(
+            {
+              rawProviders: [],
+              rawRequests: [],
+              searchMode: 'all',
+              feedLocated: false,
+              locationHint: '未定位，可搜索市区',
+            },
+            () => this.setMarkersForType(this.data.mapType)
+          )
+          return
         }
-        const rawProviders = (r && r.ok && r.providers) || []
-        const rawRequests = (r && r.ok && r.requests) || []
-        this.setData({ rawProviders, rawRequests }, () => {
-          this.setMarkersForType(this.data.mapType)
-          this.tryApplyUserMapCenter()
-        })
+        const patch: Record<string, unknown> = {
+          rawProviders: r.providers,
+          rawRequests: r.requests,
+          searchMode: r.searchMode,
+          feedLocated: r.located,
+          locationHint: feedLocationHint(r),
+        }
+        if (r.searchMode === 'gps' && r.userLat != null && r.userLng != null) {
+          patch.lat = r.userLat
+          patch.lng = r.userLng
+        } else if (r.searchMode === 'city') {
+          const center = mapCenterFromDocs([...r.providers, ...r.requests])
+          if (center) {
+            patch.lat = center.lat
+            patch.lng = center.lng
+          }
+        }
+        this.setData(patch, () => this.setMarkersForType(this.data.mapType))
       })
       .catch(() => {
         this.setData({ rawProviders: [], rawRequests: [] }, () => {
           this.setMarkersForType(this.data.mapType)
-          this.tryApplyUserMapCenter()
         })
       })
   },

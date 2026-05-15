@@ -4,20 +4,49 @@
     <text class="signal">5G 87%</text>
   </view>
 
-  <view class="header">
+  <view class="header-row">
     <text class="title">附近信息</text>
-    <text class="sub">寄养家庭 · 宠主需求</text>
+    <text class="hint">{{locationHint}}</text>
+  </view>
+
+  <view class="city-search">
+    <input
+      class="city-input"
+      placeholder="搜索市区，如：浦东新区"
+      value="{{cityInput}}"
+      confirm-type="search"
+      bindinput="onCityInput"
+      bindconfirm="onCitySearch"
+    />
+    <button class="city-btn" size="mini" bindtap="onCitySearch">搜索</button>
+    <text wx:if="{{activeCityQuery}}" class="city-clear" bindtap="onClearCity">清除</text>
   </view>
 
   <view wx:if="{{loading}}" class="hint-loading">加载中…</view>
   <view wx:elif="{{empty}}" class="empty-box">
-    <text>暂无已发布内容。去「发布」分别以寄养家庭或宠物主身份提交即可出现在首页与地图。</text>
+    <text wx:if="{{searchMode === 'gps'}}">50km 内暂无已发布内容。可切换分类、搜索市区，或去「发布」提交。</text>
+    <text wx:elif="{{searchMode === 'city'}}">「{{activeCityQuery}}」暂无匹配内容。请换关键词或清除后查看全部。</text>
+    <text wx:else>暂无已发布内容。可搜索市区，或去「发布」提交信息。</text>
   </view>
 
   <block wx:else>
-    <view wx:if="{{providers.length > 0}}" class="section">
-      <text class="section-title">寄养家庭</text>
-      <view class="list">
+    <view class="type-switch">
+      <view class="type-item {{feedType === 'provider' ? 'active' : ''}}" data-type="provider" bindtap="switchFeedType">
+        寄养家庭
+      </view>
+      <view class="type-item {{feedType === 'request' ? 'active' : ''}}" data-type="request" bindtap="switchFeedType">
+        宠主需求
+      </view>
+    </view>
+
+    <view wx:if="{{feedType === 'provider'}}">
+      <text class="list-heading">当前 {{providers.length}} 条</text>
+      <view wx:if="{{providers.length === 0}}" class="empty-tab">
+        <text wx:if="{{searchMode === 'gps'}}">50km 内暂无寄养家庭。可搜索市区或切换「宠主需求」。</text>
+        <text wx:elif="{{searchMode === 'city'}}">「{{activeCityQuery}}」暂无寄养家庭。请换关键词或清除筛选。</text>
+        <text wx:else>暂无寄养家庭。可搜索市区或在「发布」中提交。</text>
+      </view>
+      <view wx:else class="list">
         <view class="card" wx:for="{{providers}}" wx:key="_id">
           <view class="card-body">
             <view class="card-top">
@@ -25,7 +54,10 @@
               <text class="distance">{{item.distance}}</text>
             </view>
             <view class="photo-grid">
-              <view class="photo" wx:for="{{item.photos}}" wx:for-item="photo" wx:key="*this">{{photo}}</view>
+              <view class="photo-slot" wx:for="{{item.photoSlots}}" wx:for-item="slot" wx:key="slotIdx">
+                <image wx:if="{{slot.url}}" class="photo-img" src="{{slot.url}}" mode="aspectFill" />
+                <view wx:else class="photo-placeholder">暂无图</view>
+              </view>
             </view>
             <view class="tags">
               <text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
@@ -42,9 +74,14 @@
       </view>
     </view>
 
-    <view wx:if="{{requests.length > 0}}" class="section">
-      <text class="section-title">宠主需求</text>
-      <view class="list">
+    <view wx:else>
+      <text class="list-heading">当前 {{requests.length}} 条</text>
+      <view wx:if="{{requests.length === 0}}" class="empty-tab">
+        <text wx:if="{{searchMode === 'gps'}}">50km 内暂无宠主需求。可搜索市区或切换「寄养家庭」。</text>
+        <text wx:elif="{{searchMode === 'city'}}">「{{activeCityQuery}}」暂无宠主需求。请换关键词或清除筛选。</text>
+        <text wx:else>暂无宠主需求。可搜索市区或在「发布」中提交。</text>
+      </view>
+      <view wx:else class="list">
         <view class="card" wx:for="{{requests}}" wx:key="_id">
           <view class="card-body">
             <view class="card-top">
@@ -52,7 +89,10 @@
               <text class="distance">{{item.distance}}</text>
             </view>
             <view class="photo-grid">
-              <view class="photo" wx:for="{{item.photos}}" wx:for-item="photo" wx:key="*this">{{photo}}</view>
+              <view class="photo-slot" wx:for="{{item.photoSlots}}" wx:for-item="slot" wx:key="slotIdx">
+                <image wx:if="{{slot.url}}" class="photo-img" src="{{slot.url}}" mode="aspectFill" />
+                <view wx:else class="photo-placeholder">暂无图</view>
+              </view>
             </view>
             <view class="tags">
               <text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>

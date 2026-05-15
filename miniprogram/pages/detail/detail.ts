@@ -10,14 +10,24 @@ type PhotoCell = { url?: string; label: string; idx: number }
 function buildPhotoCells(doc: CloudDoc, listingType: 'provider' | 'request'): PhotoCell[] {
   if (listingType === 'provider') {
     const urls = ((doc.environment_photos as string[]) || []).filter(
-      (u) => typeof u === 'string' && /^https?:\/\//.test(u)
+      (u) =>
+        typeof u === 'string' &&
+        (/^https?:\/\//.test(u) || /^cloud:\/\//.test(u))
     )
     if (urls.length) {
       return urls.slice(0, 6).map((url, i) => ({ url, label: '', idx: i }))
     }
     return [0, 1, 2, 3, 4, 5].map((i) => ({ label: i < 3 ? '环境照' : '待补充', idx: i }))
   }
-  return [0, 1, 2].map((i) => ({ label: '需求示意', idx: i }))
+  const urls = ((doc.pet_photos as string[]) || []).filter(
+    (u) =>
+      typeof u === 'string' &&
+      (/^https?:\/\//.test(u) || /^cloud:\/\//.test(u))
+  )
+  if (urls.length) {
+    return urls.slice(0, 6).map((url, i) => ({ url, label: '', idx: i }))
+  }
+  return [0, 1, 2].map((i) => ({ label: '宠物照', idx: i }))
 }
 
 Page({
