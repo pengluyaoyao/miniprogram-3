@@ -2,6 +2,9 @@ const cloud = require('wx-server-sdk')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 
+/** 与 miniprogram/constants/subscribeMessage.ts 保持一致 */
+const DEFAULT_SUBSCRIBE_TMPL_NEW_MSG = '9JxH1WSbK_o3VkWScncrkAQIYFxYFGijFnet30TaIR8'
+
 const db = cloud.database()
 const _ = db.command
 
@@ -133,10 +136,12 @@ exports.main = async (event) => {
       },
     })
 
-  const tmplId = process.env.SUBSCRIBE_TMPL_NEW_MSG || ''
+  const tmplId = process.env.SUBSCRIBE_TMPL_NEW_MSG || DEFAULT_SUBSCRIBE_TMPL_NEW_MSG
+  const miniprogramState = process.env.SUBSCRIBE_MINIPROGRAM_STATE || 'formal'
   if (tmplId && recipient) {
     try {
       const nowStr = new Date().toISOString().slice(0, 16).replace('T', ' ')
+      const preview = (listingTitle || body).slice(0, 20) || '新留言'
       await cloud.openapi.subscribeMessage.send({
         touser: recipient,
         templateId: tmplId,
@@ -144,10 +149,11 @@ exports.main = async (event) => {
         lang: 'zh_CN',
         data: {
           thing1: { value: '新站内留言' },
-          thing2: { value: body.slice(0, 20) || '（无预览）' },
+          thing4: { value: preview },
           time3: { value: nowStr },
+          thing6: { value: ' ' },
         },
-        miniprogramState: 'developer',
+        miniprogramState,
       })
     } catch (e) {
       console.warn('[chatSend] subscribeMessage', e && (e.message || e))

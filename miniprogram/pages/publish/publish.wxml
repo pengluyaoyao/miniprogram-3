@@ -4,9 +4,9 @@
     <text class="signal">5G 87%</text>
   </view>
 
-  <view class="title">发布信息</view>
+  <view class="title">{{pageTitle}}</view>
 
-  <view class="role-switch">
+  <view class="role-switch" wx:if="{{!isEdit}}">
     <view class="role-item {{role === 'owner' ? 'active' : ''}}" data-role="owner" bindtap="switchRole">宠物主</view>
     <view class="role-item {{role === 'provider' ? 'active' : ''}}" data-role="provider" bindtap="switchRole">寄养家庭</view>
   </view>
@@ -18,25 +18,37 @@
   </view>
 
   <view class="card" wx:if="{{step === 1}}">
+    <view class="region-field">
+      <text class="field-label">所在市区（必选）</text>
+      <picker
+        mode="multiSelector"
+        range="{{regionPickerRange}}"
+        value="{{regionPickerValue}}"
+        bindcolumnchange="onRegionColumnChange"
+        bindchange="onRegionChange"
+      >
+        <view class="region-picker">{{regionLabel || '请选择市、区'}}</view>
+      </picker>
+      <text class="field-hint">坐标按区中心示意保存，非精确门牌</text>
+    </view>
     <view wx:if="{{role === 'owner'}}">
       <input class="input" placeholder="宠物昵称" value="{{owner.petName}}" data-role="owner" data-field="petName" bindinput="onFormField" />
       <input class="input" placeholder="宠物类型（狗/猫）" value="{{owner.petType}}" data-role="owner" data-field="petType" bindinput="onFormField" />
       <input class="input" placeholder="体型（小/中/大）" value="{{owner.size}}" data-role="owner" data-field="size" bindinput="onFormField" />
-      <text class="field-label">宠物照片（最多 3 张）</text>
+      <text class="field-label">宠物照片（最多 3 张，选填）</text>
       <view class="photo-actions">
         <button class="secondary-btn photo-btn" bindtap="choosePetPhotos">选择照片并上传</button>
-        <text class="photo-hint">首页列表最多展示 3 张</text>
+        <text class="photo-hint">建议至少 1 张：首页封面将展示第一张照片，更易被看到</text>
       </view>
       <view class="photo-grid" wx:if="{{owner.petPhotos.length > 0}}">
         <view class="photo-cell" wx:for="{{owner.petPhotos}}" wx:key="*this" wx:for-index="pidx">
-          <image class="photo-thumb" src="{{item}}" mode="aspectFill" />
+          <image class="photo-thumb" src="{{owner.petPhotoDisplay[pidx] || item}}" mode="aspectFill" />
           <view class="photo-del" data-idx="{{pidx}}" bindtap="removePetPhoto">×</view>
         </view>
       </view>
     </view>
     <view wx:else>
       <input class="input" placeholder="寄养家庭名称" value="{{provider.displayName}}" data-role="provider" data-field="displayName" bindinput="onFormField" />
-      <input class="input" placeholder="所在市区（如：上海市浦东新区）" value="{{provider.cityDistrict}}" data-role="provider" data-field="cityDistrict" bindinput="onFormField" />
       <input class="input" placeholder="服务经验（年，数字）" value="{{provider.years}}" data-role="provider" data-field="years" bindinput="onFormField" />
       <input class="input" placeholder="可接收宠物（如：狗、猫，逗号分隔）" value="{{provider.acceptPets}}" data-role="provider" data-field="acceptPets" bindinput="onFormField" />
     </view>
@@ -44,8 +56,29 @@
 
   <view class="card" wx:if="{{step === 2}}">
     <view wx:if="{{role === 'owner'}}">
-      <input class="input" placeholder="寄养时间（如 6月1日-6月5日）" value="{{owner.periodText}}" data-role="owner" data-field="periodText" bindinput="onFormField" />
-      <input class="input" placeholder="期望距离（如 5km内）" value="{{owner.distanceText}}" data-role="owner" data-field="distanceText" bindinput="onFormField" />
+      <text class="field-label">寄养时间（必选）</text>
+      <view class="date-row">
+        <picker class="date-picker-wrap" mode="date" value="{{owner.boardingStartDate}}" bindchange="onBoardingStartChange">
+          <view class="date-picker">
+            <text class="date-picker-label">开始</text>
+            <text class="date-picker-value">{{owner.boardingStartDate || '选择日期'}}</text>
+          </view>
+        </picker>
+        <text class="date-sep">至</text>
+        <picker
+          class="date-picker-wrap"
+          mode="date"
+          value="{{owner.boardingEndDate}}"
+          start="{{owner.boardingStartDate}}"
+          bindchange="onBoardingEndChange"
+        >
+          <view class="date-picker">
+            <text class="date-picker-label">结束</text>
+            <text class="date-picker-value">{{owner.boardingEndDate || '选择日期'}}</text>
+          </view>
+        </picker>
+      </view>
+      <text class="field-hint" wx:if="{{owner.boardingPeriodLabel}}">已选：{{owner.boardingPeriodLabel}}</text>
       <textarea class="textarea" placeholder="寄养需求说明" value="{{owner.description}}" data-role="owner" data-field="description" bindinput="onFormField" />
     </view>
     <view wx:else>
@@ -58,14 +91,14 @@
       </view>
       <text class="field-label">其他服务</text>
       <input class="input" placeholder="可填写其他服务，多个用逗号分隔" value="{{provider.otherServices}}" data-role="provider" data-field="otherServices" bindinput="onFormField" />
-      <text class="field-label">寄养环境照片</text>
+      <text class="field-label">寄养环境照片（选填）</text>
       <view class="photo-actions">
         <button class="secondary-btn photo-btn" bindtap="chooseEnvPhotos">选择照片并上传</button>
-        <text class="photo-hint">最多 9 张，将存入云存储</text>
+        <text class="photo-hint">建议至少 1 张：首页封面展示第一张环境照，最多 9 张</text>
       </view>
       <view class="photo-grid" wx:if="{{provider.envPhotos.length > 0}}">
         <view class="photo-cell" wx:for="{{provider.envPhotos}}" wx:key="*this" wx:for-index="pidx">
-          <image class="photo-thumb" src="{{item}}" mode="aspectFill" />
+          <image class="photo-thumb" src="{{provider.envPhotoDisplay[pidx] || item}}" mode="aspectFill" />
           <view class="photo-del" data-idx="{{pidx}}" bindtap="removeEnvPhoto">×</view>
         </view>
       </view>
@@ -73,24 +106,23 @@
   </view>
 
   <view class="card" wx:if="{{step === 3}}">
-    <view class="tip">手机号、微信号、社交账号均为选填；建议至少留一种便于对方联系。提交将写入云数据库并出现在首页/地图。</view>
-    <button class="secondary-btn loc-btn" bindtap="onGetLocationTap">获取当前位置（用于地图标点）</button>
-    <text class="loc-hint" wx:if="{{lat !== null}}">已选位置：{{lat}}, {{lng}}</text>
+    <view class="tip">手机号、微信号、社交账号均为选填；建议至少留一种便于对方联系。提交将按所选区展示在首页。</view>
     <input class="input" type="number" placeholder="手机号（选填）" value="{{contactPhone}}" bindinput="onContactPhone" />
     <input class="input" placeholder="微信号（选填）" value="{{contactWechat}}" bindinput="onContactWechat" />
     <input class="input" placeholder="社交账号（选填）" value="{{contactSocial}}" bindinput="onContactSocial" />
   </view>
 
+  <text class="sec-hint" wx:if="{{step === 3}}">提交后将自动检测文字与图片；未通过无法发布。用户举报由平台人工核实。</text>
+
   <view class="footer-actions">
     <button class="secondary-btn" bindtap="prevStep" wx:if="{{step > 1}}">上一步</button>
     <button class="primary-btn" bindtap="nextStep" wx:if="{{step < 3}}">下一步</button>
-    <button class="primary-btn" loading="{{submitting}}" bindtap="submit" wx:if="{{step === 3}}">提交发布</button>
+    <button class="primary-btn" loading="{{submitting}}" bindtap="submit" wx:if="{{step === 3}}">{{submitBtnText}}</button>
   </view>
 
   <view class="tabbar">
     <view class="tab-item" bindtap="goHome">首页</view>
     <view class="tab-item active" bindtap="goPublish">发布</view>
-    <view class="tab-item" bindtap="goMap">地图</view>
     <view class="tab-item tab-with-badge" bindtap="goMy">
       <text>我的</text>
       <view class="tab-badge" wx:if="{{msgUnread > 0}}">{{msgUnread > 99 ? '99+' : msgUnread}}</view>

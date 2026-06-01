@@ -5,7 +5,7 @@
   "boarding_period": "short_term",
   "start_date": "2026-06-01",
   "end_date": "2026-06-05",
-  "location_city": "上海市",
+  "location_city": "上海市浦东新区",
   "lat": 31.2304,
   "lng": 121.4737,
   "requirements": ["每天遛狗2次", "不可与大型犬同住"],

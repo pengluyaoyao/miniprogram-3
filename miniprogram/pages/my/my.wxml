@@ -28,7 +28,7 @@
 
     <view class="menu-list">
       <view class="menu-item" bindtap="goMyPets">我的宠物档案</view>
-      <view class="menu-item" bindtap="goMyRequests">我的寄养需求</view>
+      <view class="menu-item" bindtap="goMyPublications">我的发布</view>
       <view class="menu-item" bindtap="goMyFavorites">我的收藏</view>
       <view class="menu-item" bindtap="goMyContacts">联系过的对象</view>
       <view class="menu-item" bindtap="goMyReports">举报记录</view>
@@ -41,7 +41,6 @@
   <view class="tabbar">
     <view class="tab-item" bindtap="goHome">首页</view>
     <view class="tab-item" bindtap="goPublish">发布</view>
-    <view class="tab-item" bindtap="goMap">地图</view>
     <view class="tab-item tab-with-badge active" bindtap="goMy">
       <text>我的</text>
       <view class="tab-badge" wx:if="{{msgUnread > 0}}">{{msgUnread > 99 ? '99+' : msgUnread}}</view>

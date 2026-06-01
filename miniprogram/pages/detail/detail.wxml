@@ -1,11 +1,6 @@
+<navigation-bar title="{{pageTitle}}" back="{{true}}" color="#0f172a" background="#f8fafc"></navigation-bar>
+
 <view class="page">
-  <view class="status-bar">
-    <text class="time">9:41</text>
-    <text class="signal">5G 87%</text>
-  </view>
-
-  <view class="title">{{pageTitle}}</view>
-
   <view wx:if="{{loading}}" class="hint-state">加载中…</view>
   <view wx:elif="{{loadError}}" class="hint-state hint-error">{{loadError}}</view>
 
@@ -13,22 +8,39 @@
     <view class="card">
       <text class="name">{{heroName}}</text>
       <text class="sub">{{heroSub}}</text>
-      <view class="tags">
+      <view class="tags" wx:if="{{tagList.length}}">
         <text class="tag" wx:for="{{tagList}}" wx:key="*this">{{item}}</text>
       </view>
     </view>
 
-    <view class="card">
-      <text class="section-title">{{photoSectionTitle}}</text>
-      <view class="photo-grid">
-        <block wx:for="{{photoCells}}" wx:key="idx">
-          <image wx:if="{{item.url}}" class="photo photo-img" src="{{item.url}}" mode="aspectFill" />
-          <view wx:else class="photo">{{item.label}}</view>
-        </block>
+    <view class="card" wx:if="{{showInfoSection}}">
+      <text class="section-title">发布信息</text>
+      <view class="info-list">
+        <view class="info-row" wx:for="{{infoRows}}" wx:key="label">
+          <text class="info-label">{{item.label}}</text>
+          <text class="info-value">{{item.value}}</text>
+        </view>
       </view>
     </view>
 
-    <view class="card">
+    <view class="card" wx:if="{{photoCells.length}}">
+      <text class="section-title">{{photoSectionTitle}}</text>
+      <text class="photo-tip">点击图片可放大查看</text>
+      <view class="photo-grid">
+        <image
+          wx:for="{{photoCells}}"
+          wx:key="idx"
+          wx:if="{{item.url}}"
+          class="photo photo-img"
+          src="{{item.url}}"
+          mode="aspectFill"
+          data-idx="{{item.idx}}"
+          bindtap="onPreviewPhoto"
+        />
+      </view>
+    </view>
+
+    <view class="card" wx:if="{{descSectionTitle && descText}}">
       <text class="section-title">{{descSectionTitle}}</text>
       <text class="desc-body">{{descText}}</text>
     </view>
@@ -47,7 +59,6 @@
   <view class="tabbar">
     <view class="tab-item" bindtap="goHome">首页</view>
     <view class="tab-item" bindtap="goPublish">发布</view>
-    <view class="tab-item" bindtap="goMap">地图</view>
     <view class="tab-item tab-with-badge" bindtap="goMy">
       <text>我的</text>
       <view class="tab-badge" wx:if="{{msgUnread > 0}}">{{msgUnread > 99 ? '99+' : msgUnread}}</view>

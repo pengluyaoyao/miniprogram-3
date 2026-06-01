@@ -1,37 +1,33 @@
 import { callCloud } from './cloud'
-import { getLocationCoarse, quantizeLocationRough } from './location'
+import type { FeedCloudDoc } from './feedLoadTypes'
 
-export type FeedCloudDoc = { [key: string]: unknown }
+export type { FeedCloudDoc } from './feedLoadTypes'
 
-export type FeedSearchMode = 'gps' | 'city' | 'all'
+export type FeedSearchMode = 'all' | 'city'
 
 export type PublishedFeedResult = {
   ok: boolean
   providers: FeedCloudDoc[]
   requests: FeedCloudDoc[]
   searchMode: FeedSearchMode
-  located: boolean
   cityQuery: string
-  userLat: number | null
-  userLng: number | null
   errMsg?: string
 }
 
 export type LoadFeedOptions = {
-  /** 有值时按市区字段筛选，优先于 GPS */
+  /** 有值时按 location_city 子串筛选；无值则各返回最多 50 条 */
   cityQuery?: string
 }
 
 function parseCloudResult(
   res: WechatMiniprogram.ICloud.CallFunctionResult,
-  fallback: Pick<PublishedFeedResult, 'searchMode' | 'located' | 'cityQuery' | 'userLat' | 'userLng'>
+  cityQuery: string
 ): PublishedFeedResult {
   const r = res.result as {
     ok?: boolean
     providers?: FeedCloudDoc[]
     requests?: FeedCloudDoc[]
     searchMode?: FeedSearchMode
-    located?: boolean
     cityQuery?: string
     errMsg?: string
   }
@@ -40,11 +36,8 @@ function parseCloudResult(
       ok: false,
       providers: [],
       requests: [],
-      searchMode: 'all',
-      located: false,
-      cityQuery: '',
-      userLat: null,
-      userLng: null,
+      searchMode: cityQuery ? 'city' : 'all',
+      cityQuery,
       errMsg: (r && r.errMsg) || '加载失败',
     }
   }
@@ -52,77 +45,33 @@ function parseCloudResult(
     ok: true,
     providers: Array.isArray(r.providers) ? r.providers : [],
     requests: Array.isArray(r.requests) ? r.requests : [],
-    searchMode: r.searchMode || fallback.searchMode,
-    located: typeof r.located === 'boolean' ? r.located : fallback.located,
-    cityQuery: r.cityQuery || fallback.cityQuery,
-    userLat: fallback.userLat,
-    userLng: fallback.userLng,
+    searchMode: r.searchMode === 'city' ? 'city' : 'all',
+    cityQuery: r.cityQuery || cityQuery,
   }
 }
 
-/** GPS：50km 内按距离；市区搜索：按 location_city 匹配（含无坐标记录）；否则全量各最多 50 条 */
+/** 默认各最多 50 条；传 cityQuery 时按市区筛选，均不按距离排序 */
 export function loadPublishedFeed(options?: LoadFeedOptions): Promise<PublishedFeedResult> {
-  const city = options?.cityQuery?.trim()
-  if (city) {
-    return callCloud('getPublishedFeed', { cityQuery: city }).then((cloudRes) =>
-      parseCloudResult(cloudRes, {
-        searchMode: 'city',
-        located: false,
-        cityQuery: city,
-        userLat: null,
-        userLng: null,
-      })
-    )
-  }
-
-  return getLocationCoarse()
-    .then((res) => {
-      const q = quantizeLocationRough(res.latitude, res.longitude)
-      return callCloud('getPublishedFeed', { lat: q.lat, lng: q.lng }).then((cloudRes) =>
-        parseCloudResult(cloudRes, {
-          searchMode: 'gps',
-          located: true,
-          cityQuery: '',
-          userLat: q.lat,
-          userLng: q.lng,
-        })
-      )
-    })
-    .catch(() =>
-      callCloud('getPublishedFeed', {}).then((cloudRes) =>
-        parseCloudResult(cloudRes, {
-          searchMode: 'all',
-          located: false,
-          cityQuery: '',
-          userLat: null,
-          userLng: null,
-        })
-      )
-    )
+  const cityQuery = (options?.cityQuery || '').trim()
+  return callCloud('getPublishedFeed', { cityQuery }).then((cloudRes) =>
+    parseCloudResult(cloudRes, cityQuery)
+  )
 }
 
-export function feedLocationHint(r: Pick<PublishedFeedResult, 'searchMode' | 'cityQuery'>): string {
-  if (r.searchMode === 'city' && r.cityQuery) {
-    return `按「${r.cityQuery}」筛选`
+export function feedLocationHint(searchMode: FeedSearchMode, cityQuery: string): string {
+  if (searchMode === 'city' && cityQuery) {
+    return `筛选「${cityQuery}」`
   }
-  if (r.searchMode === 'gps') {
-    return '50km 内 · 按距离排序'
-  }
-  return '未定位，可搜索市区'
+  return '全部 · 各最多 50 条'
 }
 
-export function distanceLabelFromDoc(doc: FeedCloudDoc, searchMode: FeedSearchMode): string {
-  if (searchMode === 'gps') {
-    const label = String(doc.distance_label || '').trim()
-    return label
-  }
-  if (searchMode === 'city') {
-    return String(doc.location_city || '').trim().slice(0, 12) || '同城'
-  }
-  return '附近'
+/** 卡片上展示的市区文案 */
+export function locationLabelFromDoc(doc: FeedCloudDoc): string {
+  const label = String(doc.distance_label || doc.location_city || '').trim()
+  return label.slice(0, 16) || '未填市区'
 }
 
-/** 从列表中取第一个有效坐标，用于地图居中 */
+/** 预留：地图页下线后未使用；取列表中第一条有效坐标 */
 export function mapCenterFromDocs(docs: FeedCloudDoc[]): { lat: number; lng: number } | null {
   for (const doc of docs) {
     const lat = typeof doc.lat === 'number' ? doc.lat : Number(doc.lat)

@@ -1,4 +1,19 @@
-import { loadPublishedFeed, feedLocationHint, mapCenterFromDocs, type FeedCloudDoc } from '../../utils/feedLoad'
+/**
+ * 地图页已下线：未在 app.json 注册、无 Tab 入口；本文件与 districts/location 工具保留供后续恢复。
+ */
+import {
+  loadPublishedFeed,
+  feedLocationHint,
+  mapCenterFromDocs,
+  locationLabelFromDoc,
+  type FeedCloudDoc,
+  type FeedSearchMode,
+} from '../../utils/feedLoad'
+import {
+  mapCenterFromCityQuery,
+  cityMapPointsFromQuery,
+  resolveDocMapPosition,
+} from '../../utils/districts'
 import { quantizeLocationRough } from '../../utils/location'
 import { refreshMessageBadge } from '../../utils/inboxBadge'
 
@@ -6,6 +21,26 @@ type CloudDoc = FeedCloudDoc
 
 const DEFAULT_LAT = 31.2304
 const DEFAULT_LNG = 121.4737
+const DEFAULT_SCALE = 11
+
+function resolveMapViewport(
+  cityQuery: string | undefined,
+  docs: FeedCloudDoc[],
+  searchMode: FeedSearchMode
+): { lat: number; lng: number; scale: number } {
+  const q = (cityQuery || '').trim()
+  if (q) {
+    const fromQuery = mapCenterFromCityQuery(q)
+    if (fromQuery) {
+      return fromQuery
+    }
+  }
+  const fromDocs = mapCenterFromDocs(docs)
+  if (fromDocs) {
+    return { ...fromDocs, scale: searchMode === 'city' ? 12 : 11 }
+  }
+  return { lat: DEFAULT_LAT, lng: DEFAULT_LNG, scale: DEFAULT_SCALE }
+}
 
 type MapEntry = {
   doc: CloudDoc
@@ -40,7 +75,6 @@ function groupKeyFromRaw(lat: number, lng: number): string {
   return `${q.lat},${q.lng}`
 }
 
-/** 同网格内多条记录环形错开，避免标点完全重叠 */
 function spreadOffset(index: number, total: number): { dLat: number; dLng: number } {
   if (total <= 1) {
     return { dLat: 0, dLng: 0 }
@@ -53,14 +87,9 @@ function spreadOffset(index: number, total: number): { dLat: number; dLng: numbe
 function buildEntries(docs: CloudDoc[], kind: 'provider' | 'request', baseLat: number, baseLng: number): MapEntry[] {
   return docs.map((doc, i) => {
     const idStr = (doc._id as string) || `${kind}_${i}`
-    const rawLat =
-      typeof doc.lat === 'number' && !Number.isNaN(doc.lat as number)
-        ? (doc.lat as number)
-        : baseLat + i * 0.004 - 0.01
-    const rawLng =
-      typeof doc.lng === 'number' && !Number.isNaN(doc.lng as number)
-        ? (doc.lng as number)
-        : baseLng + i * 0.004 - 0.01
+    const pos = resolveDocMapPosition(doc)
+    const rawLat = pos ? pos.lat : baseLat + i * 0.004 - 0.01
+    const rawLng = pos ? pos.lng : baseLng + i * 0.004 - 0.01
 
     let title = ''
     let desc = ''
@@ -71,8 +100,8 @@ function buildEntries(docs: CloudDoc[], kind: 'provider' | 'request', baseLat: n
       title = `${(doc.pet_name as string) || '宠物'} · ${(doc.pet_type as string) || ''}`.slice(0, 18)
       desc = ((doc.description as string) || (doc.date_range_text as string) || '').slice(0, 80)
     }
-    const dist = String(doc.distance_label || '').trim()
-    const subtitleBase = dist ? `${dist} · ${desc || '查看详情'}` : desc || '查看详情'
+    const loc = locationLabelFromDoc(doc)
+    const subtitleBase = loc ? `${loc} · ${desc || '查看详情'}` : desc || '查看详情'
     return { doc, idStr, rawLat, rawLng, title, desc: subtitleBase, kind }
   })
 }
@@ -146,6 +175,7 @@ Page({
     mapType: 'provider' as 'provider' | 'request',
     lat: DEFAULT_LAT,
     lng: DEFAULT_LNG,
+    mapScale: DEFAULT_SCALE,
     markers: [] as WechatMiniprogram.MapMarker[],
     markersMeta: {} as Record<
       number,
@@ -160,9 +190,8 @@ Page({
     rawRequests: [] as CloudDoc[],
     cityInput: '',
     activeCityQuery: '',
-    searchMode: 'all' as 'gps' | 'city' | 'all',
-    feedLocated: false,
-    locationHint: '未定位，可搜索市区',
+    searchMode: 'all' as FeedSearchMode,
+    locationHint: '全部 · 各最多 50 条',
     msgUnread: 0,
   },
 
@@ -197,32 +226,38 @@ Page({
             {
               rawProviders: [],
               rawRequests: [],
-              searchMode: 'all',
-              feedLocated: false,
-              locationHint: '未定位，可搜索市区',
+              searchMode: cityQuery ? 'city' : 'all',
+              locationHint: feedLocationHint(cityQuery ? 'city' : 'all', cityQuery || ''),
             },
-            () => this.setMarkersForType(this.data.mapType)
+            () => {
+              this.setMarkersForType(this.data.mapType)
+              if (cityQuery) {
+                const vp = mapCenterFromCityQuery(cityQuery)
+                if (vp) {
+                  this.setData({ lat: vp.lat, lng: vp.lng, mapScale: vp.scale }, () =>
+                    this.fitMapViewport()
+                  )
+                }
+              }
+            }
           )
           return
         }
+        const allDocs = [...r.providers, ...r.requests]
+        const viewport = resolveMapViewport(cityQuery, allDocs, r.searchMode)
         const patch: Record<string, unknown> = {
           rawProviders: r.providers,
           rawRequests: r.requests,
           searchMode: r.searchMode,
-          feedLocated: r.located,
-          locationHint: feedLocationHint(r),
+          locationHint: feedLocationHint(r.searchMode, r.cityQuery),
+          lat: viewport.lat,
+          lng: viewport.lng,
+          mapScale: viewport.scale,
         }
-        if (r.searchMode === 'gps' && r.userLat != null && r.userLng != null) {
-          patch.lat = r.userLat
-          patch.lng = r.userLng
-        } else if (r.searchMode === 'city') {
-          const center = mapCenterFromDocs([...r.providers, ...r.requests])
-          if (center) {
-            patch.lat = center.lat
-            patch.lng = center.lng
-          }
-        }
-        this.setData(patch, () => this.setMarkersForType(this.data.mapType))
+        this.setData(patch, () => {
+          this.setMarkersForType(this.data.mapType)
+          this.fitMapViewport()
+        })
       })
       .catch(() => {
         this.setData({ rawProviders: [], rawRequests: [] }, () => {
@@ -233,8 +268,10 @@ Page({
 
   switchType(e: WechatMiniprogram.BaseEvent) {
     const mapType = e.currentTarget.dataset.type as 'provider' | 'request'
-    this.setData({ mapType })
-    this.setMarkersForType(mapType)
+    this.setData({ mapType }, () => {
+      this.setMarkersForType(mapType)
+      this.fitMapViewport()
+    })
   },
 
   applyListSelection(listRows: ListRow[], selectedId: string) {
@@ -257,9 +294,44 @@ Page({
       markersMeta: meta,
       listRows,
       previewTitle: firstMeta ? firstMeta.title : '暂无标点',
-      previewDesc: firstMeta ? firstMeta.desc : '请先发布对应类型信息',
+      previewDesc: firstMeta ? firstMeta.desc : '暂无已发布信息',
       selectedListingId: first ? first.listingId : '',
       selectedListingType: first ? first.listingType : (kind as 'provider' | 'request'),
+    })
+  },
+
+  fitMapViewport() {
+    const mapCtx = wx.createMapContext('feedMap', this)
+    const q = (this.data.activeCityQuery || '').trim()
+    const cityPoints = q ? cityMapPointsFromQuery(q) : null
+    const markerPoints = this.data.markers.map((m) => ({
+      latitude: m.latitude,
+      longitude: m.longitude,
+    }))
+
+    const points: { latitude: number; longitude: number }[] = []
+
+    if (cityPoints && cityPoints.length) {
+      points.push(...cityPoints)
+      if (markerPoints.length) {
+        points.push(...markerPoints)
+      }
+    } else if (markerPoints.length) {
+      points.push(...markerPoints)
+    } else {
+      const { lat, lng } = this.data
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        points.push({ latitude: lat, longitude: lng })
+      }
+    }
+
+    if (!points.length) {
+      return
+    }
+
+    mapCtx.includePoints({
+      points,
+      padding: cityPoints ? [56, 40, 200, 40] : [72, 48, 200, 48],
     })
   },
 

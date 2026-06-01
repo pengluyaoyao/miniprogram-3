@@ -1,92 +1,43 @@
 import { refreshMessageBadge } from '../../utils/inboxBadge'
 import {
-  distanceLabelFromDoc,
   feedLocationHint,
   loadPublishedFeed,
   type FeedCloudDoc,
   type FeedSearchMode,
 } from '../../utils/feedLoad'
+import {
+  buildWaterfallColumns,
+  coverPaddingFromAspectRatio,
+  mapProviderToWaterfall,
+  mapRequestToWaterfall,
+  recalcCardHeight,
+  resolveWaterfallCoverUrls,
+  type WaterfallCard,
+} from '../../utils/feedCover'
 
-type PhotoSlot = { slotIdx: number; url: string }
-
-type HomeFeedCard = {
-  _id: string
-  id: string
-  name: string
-  distance: string
-  tags: string[]
-  photoSlots: PhotoSlot[]
-  desc: string
-  listType: 'provider' | 'request'
-}
-
-function pickImageUrls(raw: unknown): string[] {
-  if (!Array.isArray(raw)) {
-    return []
-  }
-  return raw.filter(
-    (u): u is string =>
-      typeof u === 'string' &&
-      (/^https?:\/\//.test(u) || /^cloud:\/\//.test(u))
-  )
-}
-
-function buildThreePhotoSlots(urls: string[]): PhotoSlot[] {
-  const slice = urls.slice(0, 3)
-  return [0, 1, 2].map((slotIdx) => ({
-    slotIdx,
-    url: slice[slotIdx] || '',
-  }))
-}
-
-function mapProviderToCard(doc: FeedCloudDoc, searchMode: FeedSearchMode): HomeFeedCard {
-  const tags = (doc.service_tags as string[]) || []
-  const tagSlice = tags.slice(0, 4)
-  const urls = pickImageUrls(doc.environment_photos)
-  return {
-    _id: doc._id as string,
-    id: doc._id as string,
-    name: (doc.display_name as string) || '寄养家庭',
-    distance: distanceLabelFromDoc(doc, searchMode),
-    tags: tagSlice.length ? tagSlice : ['家庭寄养'],
-    photoSlots: buildThreePhotoSlots(urls),
-    desc: (doc.env_description as string) || (doc.service_summary as string) || '欢迎了解',
-    listType: 'provider',
-  }
-}
-
-function mapRequestToCard(doc: FeedCloudDoc, searchMode: FeedSearchMode): HomeFeedCard {
-  const petName = (doc.pet_name as string) || '宠物'
-  const petType = String(doc.pet_type || '').trim()
-  const size = String(doc.size || '').trim()
-  const tagSlice = [petType, size].filter(Boolean).slice(0, 4)
-  const urls = pickImageUrls(doc.pet_photos)
-  return {
-    _id: doc._id as string,
-    id: doc._id as string,
-    name: `${petName} 的寄养需求`,
-    distance: distanceLabelFromDoc(doc, searchMode),
-    tags: tagSlice.length ? tagSlice : ['寄养需求'],
-    photoSlots: buildThreePhotoSlots(urls),
-    desc:
-      String(doc.description || doc.date_range_text || '').trim() || '欢迎了解',
-    listType: 'request',
-  }
-}
+let rawProvidersCache: FeedCloudDoc[] = []
+let rawRequestsCache: FeedCloudDoc[] = []
+let layoutCardsCache: WaterfallCard[] = []
+let relayoutTimer: ReturnType<typeof setTimeout> | null = null
 
 Page({
   data: {
     feedType: 'provider' as 'provider' | 'request',
-    providers: [] as HomeFeedCard[],
-    requests: [] as HomeFeedCard[],
+    leftColumn: [] as WaterfallCard[],
+    rightColumn: [] as WaterfallCard[],
+    listCount: 0,
     cityInput: '',
     activeCityQuery: '',
     searchMode: 'all' as FeedSearchMode,
-    feedLocated: false,
-    locationHint: '未定位，可搜索市区',
+    locationHint: '全部 · 各最多 50 条',
     loading: false,
     empty: false,
     msgUnread: 0,
+    scrollViewHeight: 400,
+  },
+
+  onReady() {
+    this.measureScrollHeight()
   },
 
   onShow() {
@@ -94,12 +45,21 @@ Page({
     this.loadFeed()
   },
 
-  switchFeedType(e: WechatMiniprogram.BaseEvent) {
-    const feedType = e.currentTarget.dataset.type as 'provider' | 'request'
-    if (feedType !== 'provider' && feedType !== 'request') {
+  measureScrollHeight() {
+    if (this.data.loading || this.data.empty || this.data.listCount === 0) {
       return
     }
-    this.setData({ feedType })
+    const sys = wx.getSystemInfoSync()
+    const safeBottom = sys.safeArea ? sys.screenHeight - sys.safeArea.bottom : 0
+    const tabBarPx = (100 * sys.windowWidth) / 750 + safeBottom
+    const q = this.createSelectorQuery()
+    q.select('.page-top').boundingClientRect()
+    q.select('.page-above-scroll').boundingClientRect()
+    q.exec((res) => {
+      const topBottom = res[1]?.bottom ?? res[0]?.bottom ?? 0
+      const height = sys.windowHeight - topBottom - tabBarPx
+      this.setData({ scrollViewHeight: Math.max(240, Math.floor(height)) })
+    })
   },
 
   onCityInput(e: WechatMiniprogram.Input) {
@@ -115,45 +75,131 @@ Page({
     this.setData({ cityInput: '', activeCityQuery: '' }, () => this.loadFeed())
   },
 
+  switchFeedType(e: WechatMiniprogram.BaseEvent) {
+    const feedType = e.currentTarget.dataset.type as 'provider' | 'request'
+    if (feedType !== 'provider' && feedType !== 'request') {
+      return
+    }
+    this.setData({ feedType }, () => {
+      this.applyWaterfallForType()
+      wx.nextTick(() => this.measureScrollHeight())
+    })
+  },
+
+  applyWaterfallForType() {
+    const docs = this.data.feedType === 'provider' ? rawProvidersCache : rawRequestsCache
+    const cards = docs.map((doc) =>
+      this.data.feedType === 'provider'
+        ? mapProviderToWaterfall(doc)
+        : mapRequestToWaterfall(doc)
+    )
+    this.layoutWaterfall(cards)
+  },
+
+  publishWaterfallColumns() {
+    const { leftColumn, rightColumn } = buildWaterfallColumns(layoutCardsCache)
+    this.setData(
+      {
+        leftColumn,
+        rightColumn,
+        listCount: layoutCardsCache.length,
+      },
+      () => wx.nextTick(() => this.measureScrollHeight())
+    )
+  },
+
+  scheduleRelayout() {
+    if (relayoutTimer) {
+      clearTimeout(relayoutTimer)
+    }
+    relayoutTimer = setTimeout(() => {
+      relayoutTimer = null
+      this.publishWaterfallColumns()
+    }, 80)
+  },
+
+  layoutWaterfall(cards: WaterfallCard[]) {
+    resolveWaterfallCoverUrls(cards).then((resolved) => {
+      layoutCardsCache = resolved.map((c) => recalcCardHeight(c))
+      this.publishWaterfallColumns()
+    })
+  },
+
+  onCoverImageLoad(e: WechatMiniprogram.ImageLoad) {
+    const id = (e.currentTarget.dataset as { id?: string }).id
+    const w = e.detail.width
+    const h = e.detail.height
+    if (!id || !w || !h) {
+      return
+    }
+    const idx = layoutCardsCache.findIndex((c) => c.id === id)
+    if (idx < 0) {
+      return
+    }
+    const nextPct = coverPaddingFromAspectRatio(h / w)
+    const cur = layoutCardsCache[idx]
+    if (Math.abs(cur.coverPaddingPercent - nextPct) < 4) {
+      return
+    }
+    layoutCardsCache[idx] = recalcCardHeight({
+      ...cur,
+      coverPaddingPercent: nextPct,
+    })
+    this.scheduleRelayout()
+  },
+
   loadFeed() {
     this.setData({ loading: true })
     const cityQuery = this.data.activeCityQuery || undefined
     loadPublishedFeed({ cityQuery })
       .then((r) => {
         if (!r.ok) {
+          rawProvidersCache = []
+          rawRequestsCache = []
+          layoutCardsCache = []
           this.setData({
-            providers: [],
-            requests: [],
+            leftColumn: [],
+            rightColumn: [],
+            listCount: 0,
             empty: true,
             loading: false,
-            searchMode: 'all',
-            feedLocated: false,
-            locationHint: '未定位，可搜索市区',
+            searchMode: cityQuery ? 'city' : 'all',
+            locationHint: feedLocationHint(cityQuery ? 'city' : 'all', cityQuery || ''),
           })
           return
         }
-        const searchMode = r.searchMode
-        const providers = r.providers.map((doc) => mapProviderToCard(doc, searchMode))
-        const requests = r.requests.map((doc) => mapRequestToCard(doc, searchMode))
-        this.setData({
-          providers,
-          requests,
-          searchMode,
-          feedLocated: r.located,
-          locationHint: feedLocationHint(r),
-          empty: providers.length === 0 && requests.length === 0,
-          loading: false,
-        })
+        rawProvidersCache = r.providers
+        rawRequestsCache = r.requests
+        const empty = r.providers.length === 0 && r.requests.length === 0
+        this.setData(
+          {
+            searchMode: r.searchMode,
+            locationHint: feedLocationHint(r.searchMode, r.cityQuery),
+            empty,
+            loading: false,
+          },
+          () => {
+            if (!empty) {
+              this.applyWaterfallForType()
+            } else {
+              layoutCardsCache = []
+              this.setData({ leftColumn: [], rightColumn: [], listCount: 0 })
+            }
+          }
+        )
       })
       .catch(() => {
+        rawProvidersCache = []
+        rawRequestsCache = []
+        layoutCardsCache = []
         this.setData({
-          providers: [],
-          requests: [],
+          leftColumn: [],
+          rightColumn: [],
+          listCount: 0,
           empty: true,
           loading: false,
           searchMode: 'all',
-          feedLocated: false,
-          locationHint: '未定位，可搜索市区',
+          locationHint: '加载失败，请重试',
         })
       })
   },
@@ -177,11 +223,6 @@ Page({
   goMy() {
     wx.reLaunch({
       url: '/pages/my/my',
-    })
-  },
-  goMap() {
-    wx.reLaunch({
-      url: '/pages/map/map',
     })
   },
 })

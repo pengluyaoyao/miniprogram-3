@@ -33,6 +33,7 @@ const COLLECTIONS = [
   'reports',
   'chat_threads',
   'chat_messages',
+  'sec_media_checks',
 ]
 
 function isCollectionAlreadyExistsError(err) {

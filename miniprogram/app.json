@@ -3,7 +3,6 @@
     "pages/home/home",
     "pages/detail/detail",
     "pages/publish/publish",
-    "pages/map/map",
     "pages/my/my",
     "pages/my-requests/my-requests",
     "pages/my-contacts/my-contacts",
@@ -20,11 +19,6 @@
   "window": {
     "navigationBarTextStyle": "black",
     "navigationStyle": "custom"
-  },
-  "permission": {
-    "scope.userLocation": {
-      "desc": "用于地图与发布的大致位置（非高精度）"
-    }
   },
   "rendererOptions": {
     "skyline": {

@@ -1,15 +1,16 @@
 <view class="page">
-  <view class="status-bar">
-    <text class="time">9:41</text>
-    <text class="signal">5G 87%</text>
-  </view>
+  <view class="page-top">
+    <view class="status-bar">
+      <text class="time">9:41</text>
+      <text class="signal">5G 87%</text>
+    </view>
 
-  <view class="header-row">
-    <text class="title">附近信息</text>
-    <text class="hint">{{locationHint}}</text>
-  </view>
+    <view class="header-row">
+      <text class="title">寄养信息</text>
+      <text class="hint">{{locationHint}}</text>
+    </view>
 
-  <view class="city-search">
+    <view class="city-search">
     <input
       class="city-input"
       placeholder="搜索市区，如：浦东新区"
@@ -19,101 +20,124 @@
       bindconfirm="onCitySearch"
     />
     <button class="city-btn" size="mini" bindtap="onCitySearch">搜索</button>
-    <text wx:if="{{activeCityQuery}}" class="city-clear" bindtap="onClearCity">清除</text>
+    <text wx:if="{{activeCityQuery}}" class="city-clear" bindtap="onClearCity">全部</text>
+    </view>
   </view>
 
   <view wx:if="{{loading}}" class="hint-loading">加载中…</view>
   <view wx:elif="{{empty}}" class="empty-box">
-    <text wx:if="{{searchMode === 'gps'}}">50km 内暂无已发布内容。可切换分类、搜索市区，或去「发布」提交。</text>
-    <text wx:elif="{{searchMode === 'city'}}">「{{activeCityQuery}}」暂无匹配内容。请换关键词或清除后查看全部。</text>
-    <text wx:else>暂无已发布内容。可搜索市区，或去「发布」提交信息。</text>
+    <text wx:if="{{searchMode === 'city'}}">「{{activeCityQuery}}」暂无匹配。请换关键词或点「全部」查看列表。</text>
+    <text wx:else>暂无已发布内容。可去「发布」提交信息。</text>
   </view>
 
   <block wx:else>
-    <view class="type-switch">
-      <view class="type-item {{feedType === 'provider' ? 'active' : ''}}" data-type="provider" bindtap="switchFeedType">
-        寄养家庭
+    <view class="page-above-scroll">
+      <view class="type-switch">
+        <view class="type-item {{feedType === 'provider' ? 'active' : ''}}" data-type="provider" bindtap="switchFeedType">
+          寄养家庭
+        </view>
+        <view class="type-item {{feedType === 'request' ? 'active' : ''}}" data-type="request" bindtap="switchFeedType">
+          宠主需求
+        </view>
       </view>
-      <view class="type-item {{feedType === 'request' ? 'active' : ''}}" data-type="request" bindtap="switchFeedType">
-        宠主需求
+
+      <text class="list-heading" wx:if="{{listCount > 0}}">共 {{listCount}} 条</text>
+      <view wx:if="{{listCount === 0}}" class="empty-tab">
+        <text wx:if="{{searchMode === 'city'}}">「{{activeCityQuery}}」暂无{{feedType === 'provider' ? '寄养家庭' : '宠主需求'}}。</text>
+        <text wx:else>暂无{{feedType === 'provider' ? '寄养家庭' : '宠主需求'}}。</text>
       </view>
     </view>
 
-    <view wx:if="{{feedType === 'provider'}}">
-      <text class="list-heading">当前 {{providers.length}} 条</text>
-      <view wx:if="{{providers.length === 0}}" class="empty-tab">
-        <text wx:if="{{searchMode === 'gps'}}">50km 内暂无寄养家庭。可搜索市区或切换「宠主需求」。</text>
-        <text wx:elif="{{searchMode === 'city'}}">「{{activeCityQuery}}」暂无寄养家庭。请换关键词或清除筛选。</text>
-        <text wx:else>暂无寄养家庭。可搜索市区或在「发布」中提交。</text>
-      </view>
-      <view wx:else class="list">
-        <view class="card" wx:for="{{providers}}" wx:key="_id">
-          <view class="card-body">
-            <view class="card-top">
-              <text class="name">{{item.name}}</text>
-              <text class="distance">{{item.distance}}</text>
-            </view>
-            <view class="photo-grid">
-              <view class="photo-slot" wx:for="{{item.photoSlots}}" wx:for-item="slot" wx:key="slotIdx">
-                <image wx:if="{{slot.url}}" class="photo-img" src="{{slot.url}}" mode="aspectFill" />
-                <view wx:else class="photo-placeholder">暂无图</view>
-              </view>
-            </view>
-            <view class="tags">
-              <text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
-            </view>
-            <text class="desc">{{item.desc}}</text>
-          </view>
-          <button
-            class="primary-btn"
+    <scroll-view
+      wx:if="{{listCount > 0}}"
+      scroll-y
+      class="waterfall-scroll"
+      style="height: {{scrollViewHeight}}px;"
+      enhanced
+      show-scrollbar="{{false}}"
+    >
+      <view class="waterfall">
+        <view class="waterfall-col">
+          <view
+            wx:for="{{leftColumn}}"
+            wx:key="_id"
+            class="note-card"
             data-id="{{item.id}}"
             data-type="{{item.listType}}"
             bindtap="goDetail"
-          >查看详情 / 联系TA</button>
-        </view>
-      </view>
-    </view>
-
-    <view wx:else>
-      <text class="list-heading">当前 {{requests.length}} 条</text>
-      <view wx:if="{{requests.length === 0}}" class="empty-tab">
-        <text wx:if="{{searchMode === 'gps'}}">50km 内暂无宠主需求。可搜索市区或切换「寄养家庭」。</text>
-        <text wx:elif="{{searchMode === 'city'}}">「{{activeCityQuery}}」暂无宠主需求。请换关键词或清除筛选。</text>
-        <text wx:else>暂无宠主需求。可搜索市区或在「发布」中提交。</text>
-      </view>
-      <view wx:else class="list">
-        <view class="card" wx:for="{{requests}}" wx:key="_id">
-          <view class="card-body">
-            <view class="card-top">
-              <text class="name">{{item.name}}</text>
-              <text class="distance">{{item.distance}}</text>
-            </view>
-            <view class="photo-grid">
-              <view class="photo-slot" wx:for="{{item.photoSlots}}" wx:for-item="slot" wx:key="slotIdx">
-                <image wx:if="{{slot.url}}" class="photo-img" src="{{slot.url}}" mode="aspectFill" />
-                <view wx:else class="photo-placeholder">暂无图</view>
+          >
+            <view class="cover-box">
+              <view class="cover-ratio" style="height: {{item.coverHeightRpx}}rpx;"></view>
+              <image
+                wx:if="{{item.hasCover}}"
+                class="cover-img"
+                src="{{item.coverUrl}}"
+                mode="aspectFill"
+                lazy-load
+                data-id="{{item.id}}"
+                bindload="onCoverImageLoad"
+              />
+              <view
+                wx:else
+                class="cover-placeholder cover-placeholder-{{item.placeholderType}}"
+              >
+                <text class="cover-ph-icon">{{item.placeholderType === 'provider' ? '🏠' : '🐾'}}</text>
+                <text class="cover-ph-text">{{item.placeholderType === 'provider' ? '环境待补充' : '宠物待补充'}}</text>
               </view>
             </view>
-            <view class="tags">
-              <text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+            <view class="note-body">
+              <text class="note-title">{{item.name}}</text>
+              <text class="note-city">{{item.locationCity}}</text>
+              <view class="note-tags" wx:if="{{item.tags.length}}">
+                <text class="note-tag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+              </view>
             </view>
-            <text class="desc">{{item.desc}}</text>
           </view>
-          <button
-            class="primary-btn"
+        </view>
+        <view class="waterfall-col">
+          <view
+            wx:for="{{rightColumn}}"
+            wx:key="_id"
+            class="note-card"
             data-id="{{item.id}}"
             data-type="{{item.listType}}"
             bindtap="goDetail"
-          >查看详情 / 联系TA</button>
+          >
+            <view class="cover-box">
+              <view class="cover-ratio" style="height: {{item.coverHeightRpx}}rpx;"></view>
+              <image
+                wx:if="{{item.hasCover}}"
+                class="cover-img"
+                src="{{item.coverUrl}}"
+                mode="aspectFill"
+                lazy-load
+                data-id="{{item.id}}"
+                bindload="onCoverImageLoad"
+              />
+              <view
+                wx:else
+                class="cover-placeholder cover-placeholder-{{item.placeholderType}}"
+              >
+                <text class="cover-ph-icon">{{item.placeholderType === 'provider' ? '🏠' : '🐾'}}</text>
+                <text class="cover-ph-text">{{item.placeholderType === 'provider' ? '环境待补充' : '宠物待补充'}}</text>
+              </view>
+            </view>
+            <view class="note-body">
+              <text class="note-title">{{item.name}}</text>
+              <text class="note-city">{{item.locationCity}}</text>
+              <view class="note-tags" wx:if="{{item.tags.length}}">
+                <text class="note-tag" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+              </view>
+            </view>
+          </view>
         </view>
       </view>
-    </view>
+    </scroll-view>
   </block>
 
   <view class="tabbar">
     <view class="tab-item active" bindtap="goHome">首页</view>
     <view class="tab-item" bindtap="goPublish">发布</view>
-    <view class="tab-item" bindtap="goMap">地图</view>
     <view class="tab-item tab-with-badge" bindtap="goMy">
       <text>我的</text>
       <view class="tab-badge" wx:if="{{msgUnread > 0}}">{{msgUnread > 99 ? '99+' : msgUnread}}</view>

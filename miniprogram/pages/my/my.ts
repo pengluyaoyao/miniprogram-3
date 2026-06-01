@@ -37,9 +37,6 @@ Page({
   goMy() {
     // Current page
   },
-  goMap() {
-    wx.reLaunch({ url: '/pages/map/map' })
-  },
 
   goInbox() {
     if (!isLoggedIn()) {
@@ -51,7 +48,7 @@ Page({
     wx.navigateTo({ url: '/pages/inbox/inbox' })
   },
 
-  goMyRequests() {
+  goMyPublications() {
     const path = '/pages/my-requests/my-requests'
     if (!isLoggedIn()) {
       wx.navigateTo({ url: `/pages/login/login?redirect=${encodeURIComponent(path)}` })

@@ -1,25 +1,44 @@
+import { requestNewMessageSubscribe } from '../../constants/subscribeMessage'
 import { callCloud } from '../../utils/cloud'
+import { resolveCloudFileUrls } from '../../utils/cloudImages'
 import { ensureLoggedIn, isLoggedIn } from '../../utils/auth'
-import { getLocationCoarse, quantizeLocationRough } from '../../utils/location'
 import { refreshMessageBadge } from '../../utils/inboxBadge'
+import {
+  initRegionFromStorage,
+  onRegionColumnChange,
+  onRegionPickerChange,
+  getPublishRegion,
+  buildRegionPageFields,
+  regionIndicesFromLocationCity,
+} from '../../utils/regionPicker'
+import {
+  addDaysYmd,
+  formatBoardingRangeLabel,
+  todayYmd,
+} from '../../utils/boardingPeriod'
 
 const PUBLISH_REDIRECT = '/pages/publish/publish'
 
-const emptyOwner = () => ({
-  petName: '',
-  petType: '',
-  size: '',
-  periodText: '',
-  distanceText: '',
-  description: '',
-  petPhotos: [] as string[],
-})
+const emptyOwner = () => {
+  const start = todayYmd()
+  return {
+    petName: '',
+    petType: '',
+    size: '',
+    boardingStartDate: start,
+    boardingEndDate: addDaysYmd(start, 3),
+    boardingPeriodLabel: formatBoardingRangeLabel(start, addDaysYmd(start, 3)),
+    distanceText: '',
+    description: '',
+    petPhotos: [] as string[],
+    petPhotoDisplay: [] as string[],
+  }
+}
 
 type ProviderForm = {
   displayName: string
   years: string
   acceptPets: string
-  cityDistrict: string
   svcMed: boolean
   svcPickup: boolean
   svcVideo: boolean
@@ -32,13 +51,13 @@ const emptyProvider = (): ProviderForm => ({
   displayName: '',
   years: '',
   acceptPets: '',
-  cityDistrict: '',
   svcMed: false,
   svcPickup: false,
   svcVideo: false,
   svcCamera: false,
   otherServices: '',
   envPhotos: [],
+  envPhotoDisplay: [] as string[],
 })
 
 Page({
@@ -51,33 +70,213 @@ Page({
     contactPhone: '',
     contactWechat: '',
     contactSocial: '',
-    lat: null as number | null,
-    lng: null as number | null,
     submitting: false,
     msgUnread: 0,
+    regionCityIndex: 0,
+    regionDistrictIndex: 10,
+    regionPickerRange: [['上海市'], ['浦东新区']] as [string[], string[]],
+    regionPickerValue: [0, 10] as [number, number],
+    regionLabel: '',
+    isEdit: false,
+    editId: '',
+    editListType: 'request' as 'provider' | 'request',
+    pageTitle: '发布信息',
+    submitBtnText: '提交发布',
+  },
+
+  onLoad(query: Record<string, string | undefined>) {
+    const editId = (query.editId && decodeURIComponent(query.editId)) || ''
+    const typeRaw = (query.type && decodeURIComponent(query.type)) || 'request'
+    const editListType = typeRaw === 'provider' ? 'provider' : 'request'
+    const isEdit = !!editId
+
+    try {
+      const region = initRegionFromStorage()
+      this.setData({
+        regionCityIndex: region.regionCityIndex,
+        regionDistrictIndex: region.regionDistrictIndex,
+        regionPickerRange: region.regionPickerRange,
+        regionPickerValue: region.regionPickerValue,
+        regionLabel: region.regionLabel,
+        isEdit,
+        editId,
+        editListType,
+        role: editListType === 'provider' ? 'provider' : 'owner',
+        pageTitle: isEdit ? '修改发布' : '发布信息',
+        submitBtnText: isEdit ? '保存修改' : '提交发布',
+      })
+      if (isEdit) {
+        this.loadForEdit(editId, editListType)
+      }
+    } catch (err) {
+      console.error('publish onLoad region init failed', err)
+      this.setData({
+        regionPickerRange: [['上海市'], ['浦东新区']],
+        regionPickerValue: [0, 10],
+        regionLabel: '上海市浦东新区',
+        regionCityIndex: 0,
+        regionDistrictIndex: 10,
+      })
+    }
   },
 
   onShow() {
+    refreshMessageBadge(this)
     if (isLoggedIn()) {
       this.setData({ didPromptAuth: false })
-      refreshMessageBadge(this)
       return
     }
     if (this.data.didPromptAuth) {
       return
     }
     this.setData({ didPromptAuth: true })
-    wx.navigateTo({
-      url: `/pages/login/login?redirect=${encodeURIComponent(PUBLISH_REDIRECT)}`,
-    })
+    wx.showToast({ title: '发布前请先登录', icon: 'none' })
+    setTimeout(() => {
+      wx.navigateTo({
+        url: `/pages/login/login?redirect=${encodeURIComponent(PUBLISH_REDIRECT)}`,
+      })
+    }, 400)
+  },
+
+  loadForEdit(listingId: string, listType: 'provider' | 'request') {
+    wx.showLoading({ title: '加载中' })
+    callCloud('getMyListingForEdit', { listingId, listingType: listType })
+      .then((res) => {
+        const r = res.result as { ok?: boolean; doc?: Record<string, unknown>; errMsg?: string }
+        if (!r || !r.ok || !r.doc) {
+          wx.showToast({ title: (r && r.errMsg) || '加载失败', icon: 'none' })
+          return
+        }
+        const doc = r.doc
+        const cityLabel = String(doc.location_city || '')
+        const indices = regionIndicesFromLocationCity(cityLabel)
+        const regionPatch = indices
+          ? buildRegionPageFields(indices.cityIndex, indices.districtIndex)
+          : { regionLabel: cityLabel || this.data.regionLabel }
+
+        if (listType === 'provider') {
+          const tags = ((doc.service_tags as string[]) || []) as string[]
+          const other = tags.filter(
+            (t) => !['喂药', '接送', '视频', '摄像头'].includes(t)
+          )
+          this.setData({
+            ...regionPatch,
+            provider: {
+              displayName: String(doc.display_name || ''),
+              years: String(doc.years_experience ?? ''),
+              acceptPets: ((doc.pet_types as string[]) || []).join('、'),
+              svcMed: tags.includes('喂药'),
+              svcPickup: tags.includes('接送'),
+              svcVideo: tags.includes('视频'),
+              svcCamera: tags.includes('摄像头'),
+              otherServices: other.join('、'),
+              envPhotos: ((doc.environment_photos as string[]) || []).slice(),
+              envPhotoDisplay: [],
+            },
+            contactPhone: String(doc.phone || ''),
+            contactWechat: String(doc.wechat_id || ''),
+            contactSocial: String(doc.social_accounts || ''),
+            step: 1,
+          })
+          this.syncProviderEnvPhotoDisplay()
+        } else {
+          const start = String(doc.start_date || '').slice(0, 10) || todayYmd()
+          const end = String(doc.end_date || '').slice(0, 10) || addDaysYmd(start, 3)
+          this.setData({
+            ...regionPatch,
+            owner: {
+              petName: String(doc.pet_name || ''),
+              petType: String(doc.pet_type || ''),
+              size: String(doc.size || ''),
+              boardingStartDate: start,
+              boardingEndDate: end,
+              boardingPeriodLabel: formatBoardingRangeLabel(start, end),
+              distanceText: ((doc.requirements as string[]) || []).join('；') || '',
+              description: String(doc.description || ''),
+              petPhotos: ((doc.pet_photos as string[]) || []).slice(),
+              petPhotoDisplay: [],
+            },
+            contactPhone: String(doc.phone || ''),
+            contactWechat: String(doc.wechat_id || ''),
+            contactSocial: String(doc.social_accounts || ''),
+            step: 1,
+          })
+          this.syncOwnerPetPhotoDisplay()
+        }
+      })
+      .catch(() => {
+        wx.showToast({ title: '加载失败', icon: 'none' })
+      })
+      .finally(() => {
+        wx.hideLoading()
+      })
   },
 
   switchRole(e: WechatMiniprogram.BaseEvent) {
+    if (this.data.isEdit) {
+      return
+    }
     const role = e.currentTarget.dataset.role as 'owner' | 'provider'
     this.setData({ role, step: 1 })
   },
 
+  validateOwnerBoardingDates(): boolean {
+    const { boardingStartDate, boardingEndDate } = this.data.owner
+    if (!boardingStartDate || !boardingEndDate) {
+      wx.showToast({ title: '请选择寄养起止日期', icon: 'none' })
+      return false
+    }
+    if (boardingEndDate < boardingStartDate) {
+      wx.showToast({ title: '结束日期不能早于开始', icon: 'none' })
+      return false
+    }
+    return true
+  },
+
+  syncBoardingPeriodLabel() {
+    const { boardingStartDate, boardingEndDate } = this.data.owner
+    this.setData({
+      'owner.boardingPeriodLabel': formatBoardingRangeLabel(
+        boardingStartDate,
+        boardingEndDate
+      ),
+    })
+  },
+
+  onBoardingStartChange(e: WechatMiniprogram.PickerChange) {
+    const start = String(e.detail.value || '')
+    const owner = this.data.owner
+    let end = owner.boardingEndDate
+    if (!end || end < start) {
+      end = addDaysYmd(start, 3)
+    }
+    this.setData(
+      {
+        'owner.boardingStartDate': start,
+        'owner.boardingEndDate': end,
+      },
+      () => this.syncBoardingPeriodLabel()
+    )
+  },
+
+  onBoardingEndChange(e: WechatMiniprogram.PickerChange) {
+    const end = String(e.detail.value || '')
+    const start = this.data.owner.boardingStartDate
+    if (start && end < start) {
+      wx.showToast({ title: '结束日期不能早于开始', icon: 'none' })
+      return
+    }
+    this.setData({ 'owner.boardingEndDate': end }, () => this.syncBoardingPeriodLabel())
+  },
+
   nextStep() {
+    if (this.data.step === 1 && !this.data.regionLabel) {
+      wx.showToast({ title: '请选择所在市区', icon: 'none' })
+      return
+    }
+    if (this.data.step === 2 && this.data.role === 'owner' && !this.validateOwnerBoardingDates()) {
+      return
+    }
     const next = Math.min(this.data.step + 1, 3)
     this.setData({ step: next })
   },
@@ -85,6 +284,43 @@ Page({
   prevStep() {
     const prev = Math.max(this.data.step - 1, 1)
     this.setData({ step: prev })
+  },
+
+  onRegionColumnChange(e: WechatMiniprogram.PickerColumnChange) {
+    const patch = onRegionColumnChange(
+      e.detail.column,
+      e.detail.value,
+      this.data.regionPickerValue[0]
+    )
+    if (patch) {
+      this.setData(patch)
+    }
+  },
+
+  syncOwnerPetPhotoDisplay() {
+    const ids = this.data.owner.petPhotos || []
+    resolveCloudFileUrls(ids).then((urls) => {
+      this.setData({ 'owner.petPhotoDisplay': urls })
+    })
+  },
+
+  syncProviderEnvPhotoDisplay() {
+    const ids = this.data.provider.envPhotos || []
+    resolveCloudFileUrls(ids).then((urls) => {
+      this.setData({ 'provider.envPhotoDisplay': urls })
+    })
+  },
+
+  onRegionChange(e: WechatMiniprogram.PickerChange) {
+    const value = e.detail.value as number[]
+    const region = onRegionPickerChange(value)
+    this.setData({
+      regionCityIndex: region.regionCityIndex,
+      regionDistrictIndex: region.regionDistrictIndex,
+      regionPickerRange: region.regionPickerRange,
+      regionPickerValue: region.regionPickerValue,
+      regionLabel: region.regionLabel,
+    })
   },
 
   onFormField(e: WechatMiniprogram.Input) {
@@ -120,18 +356,27 @@ Page({
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
       success: (res) => {
-        const paths = res.tempFiles.map((f) => f.tempFilePath)
-        wx.showLoading({ title: '上传中', mask: true })
-        const uploads = paths.map((filePath, i) =>
-          wx.cloud.uploadFile({
-            cloudPath: `provider_env/${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}.jpg`,
-            filePath,
-          })
+        const paths = (res.tempFiles || []).map((f) => f.tempFilePath).filter(Boolean)
+        if (!paths.length) {
+          return
+        }
+        wx.showLoading({ title: '上传中' })
+        const uploads = paths.map(
+          (filePath) =>
+            new Promise<string>((resolve, reject) => {
+              const cloudPath = `env/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`
+              wx.cloud.uploadFile({
+                cloudPath,
+                filePath,
+                success: (u) => resolve(u.fileID),
+                fail: reject,
+              })
+            })
         )
         Promise.all(uploads)
-          .then((results) => {
-            const ids = results.map((r) => r.fileID)
-            this.setData({ 'provider.envPhotos': [...prov.envPhotos, ...ids] })
+          .then((ids) => {
+            const cur = prov.envPhotos || []
+            this.setData({ 'provider.envPhotos': [...cur, ...ids] }, () => this.syncProviderEnvPhotoDisplay())
             wx.showToast({ title: '已上传', icon: 'success' })
           })
           .catch(() => {
@@ -149,14 +394,14 @@ Page({
     if (!Number.isFinite(idx) || idx < 0) {
       return
     }
-    const next = this.data.provider.envPhotos.filter((_, i) => i !== idx)
-    this.setData({ 'provider.envPhotos': next })
+    const cur = this.data.provider.envPhotos || []
+    const next = cur.filter((_, i) => i !== idx)
+    this.setData({ 'provider.envPhotos': next }, () => this.syncProviderEnvPhotoDisplay())
   },
 
   choosePetPhotos() {
-    const owner = this.data.owner as { petPhotos?: string[] }
-    const cur = owner.petPhotos || []
-    const remain = 3 - cur.length
+    const owner = this.data.owner
+    const remain = 3 - owner.petPhotos.length
     if (remain <= 0) {
       wx.showToast({ title: '最多 3 张', icon: 'none' })
       return
@@ -166,18 +411,27 @@ Page({
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
       success: (res) => {
-        const paths = res.tempFiles.map((f) => f.tempFilePath)
-        wx.showLoading({ title: '上传中', mask: true })
-        const uploads = paths.map((filePath, i) =>
-          wx.cloud.uploadFile({
-            cloudPath: `owner_pet/${Date.now()}_${i}_${Math.random().toString(36).slice(2, 8)}.jpg`,
-            filePath,
-          })
+        const paths = (res.tempFiles || []).map((f) => f.tempFilePath).filter(Boolean)
+        if (!paths.length) {
+          return
+        }
+        wx.showLoading({ title: '上传中' })
+        const uploads = paths.map(
+          (filePath) =>
+            new Promise<string>((resolve, reject) => {
+              const cloudPath = `pet/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`
+              wx.cloud.uploadFile({
+                cloudPath,
+                filePath,
+                success: (u) => resolve(u.fileID),
+                fail: reject,
+              })
+            })
         )
         Promise.all(uploads)
-          .then((results) => {
-            const ids = results.map((r) => r.fileID)
-            this.setData({ 'owner.petPhotos': [...cur, ...ids] })
+          .then((ids) => {
+            const cur = owner.petPhotos || []
+            this.setData({ 'owner.petPhotos': [...cur, ...ids] }, () => this.syncOwnerPetPhotoDisplay())
             wx.showToast({ title: '已上传', icon: 'success' })
           })
           .catch(() => {
@@ -197,7 +451,7 @@ Page({
     }
     const cur = (this.data.owner as { petPhotos: string[] }).petPhotos || []
     const next = cur.filter((_, i) => i !== idx)
-    this.setData({ 'owner.petPhotos': next })
+    this.setData({ 'owner.petPhotos': next }, () => this.syncOwnerPetPhotoDisplay())
   },
 
   onContactPhone(e: WechatMiniprogram.Input) {
@@ -210,106 +464,125 @@ Page({
     this.setData({ contactSocial: e.detail.value })
   },
 
-  onGetLocationTap() {
-    getLocationCoarse()
-      .then((res) => {
-        const q = quantizeLocationRough(res.latitude, res.longitude)
-        this.setData({ lat: q.lat, lng: q.lng })
-        wx.showToast({ title: '已获取大致位置（非高精度）', icon: 'none' })
-      })
-      .catch(() => {
-        wx.showToast({ title: '未授权则使用默认上海坐标', icon: 'none' })
-      })
-  },
-
   submit() {
     if (!ensureLoggedIn(PUBLISH_REDIRECT)) {
       return
     }
+    const region = getPublishRegion(
+      this.data.regionCityIndex,
+      this.data.regionDistrictIndex
+    )
+    if (!region.cityDistrict) {
+      wx.showToast({ title: '请选择所在市区', icon: 'none' })
+      return
+    }
+
     const phone = this.data.contactPhone.trim()
     const wechat = this.data.contactWechat.trim()
 
-    const lat = this.data.lat
-    const lng = this.data.lng
-
-    const run = (latNum: number, lngNum: number) => {
-      this.setData({ submitting: true })
-      const base = {
-        role: this.data.role,
-        lat: latNum,
-        lng: lngNum,
-      }
-      const payload: Record<string, unknown> =
-        this.data.role === 'provider'
-          ? {
-              ...base,
-              provider: {
-                displayName: this.data.provider.displayName,
-                years: this.data.provider.years,
-                acceptPets: this.data.provider.acceptPets,
-                cityDistrict: this.data.provider.cityDistrict,
-                svcMed: this.data.provider.svcMed,
-                svcPickup: this.data.provider.svcPickup,
-                svcVideo: this.data.provider.svcVideo,
-                svcCamera: this.data.provider.svcCamera,
-                otherServices: this.data.provider.otherServices,
-                environmentPhotos: this.data.provider.envPhotos,
-                phone,
-                wechatId: wechat,
-                social: this.data.contactSocial.trim(),
-              },
-            }
-          : {
-              ...base,
-              owner: {
-                ...this.data.owner,
-                phone,
-                wechatId: wechat,
-                social: this.data.contactSocial.trim(),
-              },
-            }
-      callCloud('publishListing', payload)
-        .then((res) => {
-          const r = res.result as { ok?: boolean; errMsg?: string }
-          if (r && r.ok) {
-            wx.showToast({ title: '发布成功', icon: 'success' })
-            this.setData({
-              step: 1,
-              owner: emptyOwner(),
-              provider: emptyProvider(),
-              contactPhone: '',
-              contactWechat: '',
-              contactSocial: '',
-              lat: null,
-              lng: null,
-            })
-            setTimeout(() => wx.reLaunch({ url: '/pages/home/home' }), 800)
-          } else {
-            wx.showToast({ title: r?.errMsg || '发布失败', icon: 'none' })
-          }
-        })
-        .catch((err: { errMsg?: string }) => {
-          wx.showToast({
-            title: err.errMsg || '请上传并部署云函数 publishListing',
-            icon: 'none',
-          })
-        })
-        .finally(() => {
-          this.setData({ submitting: false })
-        })
-    }
-
-    if (lat != null && lng != null) {
-      const q = quantizeLocationRough(lat, lng)
-      run(q.lat, q.lng)
+    if (this.data.role === 'provider' && !this.data.provider.displayName.trim()) {
+      wx.showToast({ title: '请填写寄养家庭名称', icon: 'none' })
       return
     }
-    getLocationCoarse()
+    if (this.data.role === 'owner' && !this.validateOwnerBoardingDates()) {
+      return
+    }
+
+    requestNewMessageSubscribe().finally(() => {
+      this.publishAfterSubscribe(phone, wechat, region)
+    })
+  },
+
+  publishAfterSubscribe(
+    phone: string,
+    wechat: string,
+    region: ReturnType<typeof getPublishRegion>
+  ) {
+    wx.showLoading({ title: '安全检测中…', mask: true })
+    this.setData({ submitting: true })
+    const locationFields = {
+      city: region.city,
+      district: region.district,
+      cityDistrict: region.cityDistrict,
+    }
+    const listingId = this.data.isEdit ? this.data.editId : ''
+    const payload: Record<string, unknown> =
+      this.data.role === 'provider'
+        ? {
+            role: 'provider',
+            listingId,
+            provider: {
+              displayName: this.data.provider.displayName,
+              years: this.data.provider.years,
+              acceptPets: this.data.provider.acceptPets,
+              ...locationFields,
+              svcMed: this.data.provider.svcMed,
+              svcPickup: this.data.provider.svcPickup,
+              svcVideo: this.data.provider.svcVideo,
+              svcCamera: this.data.provider.svcCamera,
+              otherServices: this.data.provider.otherServices,
+              environmentPhotos: this.data.provider.envPhotos,
+              phone,
+              wechatId: wechat,
+              social: this.data.contactSocial.trim(),
+            },
+          }
+        : {
+            role: 'owner',
+            listingId,
+            owner: {
+              ...this.data.owner,
+              ...locationFields,
+              phone,
+              wechatId: wechat,
+              social: this.data.contactSocial.trim(),
+            },
+          }
+
+    callCloud('publishListing', payload)
       .then((res) => {
-        const q = quantizeLocationRough(res.latitude, res.longitude)
-        run(q.lat, q.lng)
+        const r = res.result as { ok?: boolean; errMsg?: string }
+        if (r && r.ok) {
+          const wasEdit = this.data.isEdit
+          wx.showToast({ title: wasEdit ? '已保存' : '发布成功', icon: 'success' })
+          if (wasEdit) {
+            setTimeout(() => wx.navigateBack(), 600)
+            return
+          }
+          const regionInit = initRegionFromStorage()
+          this.setData({
+            step: 1,
+            isEdit: false,
+            editId: '',
+            owner: emptyOwner(),
+            provider: emptyProvider(),
+            contactPhone: '',
+            contactWechat: '',
+            contactSocial: '',
+            regionLabel: regionInit.regionLabel,
+            regionPickerValue: regionInit.regionPickerValue,
+            regionPickerRange: regionInit.regionPickerRange,
+            regionCityIndex: regionInit.regionCityIndex,
+            regionDistrictIndex: regionInit.regionDistrictIndex,
+            pageTitle: '发布信息',
+            submitBtnText: '提交发布',
+          })
+          setTimeout(() => wx.reLaunch({ url: '/pages/home/home' }), 800)
+        } else {
+          wx.showToast({ title: r?.errMsg || '发布失败', icon: 'none', duration: 2800 })
+        }
       })
-      .catch(() => run(31.2304, 121.4737))
+      .catch((err: { errMsg?: string }) => {
+        wx.showToast({
+          title: err.errMsg || '请上传并部署云函数 publishListing',
+          icon: 'none',
+          duration: 2800,
+        })
+      })
+      .finally(() => {
+        wx.hideLoading()
+        this.setData({ submitting: false })
+      })
   },
 
   goHome() {
@@ -318,8 +591,5 @@ Page({
   goPublish() {},
   goMy() {
     wx.reLaunch({ url: '/pages/my/my' })
-  },
-  goMap() {
-    wx.reLaunch({ url: '/pages/map/map' })
   },
 })

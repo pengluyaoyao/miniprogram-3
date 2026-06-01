@@ -5,7 +5,7 @@
   </view>
 
   <view class="header-row">
-    <text class="title">附近地图</text>
+    <text class="title">信息地图</text>
     <text class="hint">{{locationHint}}</text>
   </view>
 
@@ -19,7 +19,7 @@
       bindconfirm="onCitySearch"
     />
     <button class="city-btn" size="mini" bindtap="onCitySearch">搜索</button>
-    <text wx:if="{{activeCityQuery}}" class="city-clear" bindtap="onClearCity">清除</text>
+    <text wx:if="{{activeCityQuery}}" class="city-clear" bindtap="onClearCity">全部</text>
   </view>
 
   <view class="type-switch">
@@ -32,12 +32,12 @@
   </view>
 
   <map
+    id="feedMap"
     class="map"
     latitude="{{lat}}"
     longitude="{{lng}}"
-    scale="14"
+    scale="{{mapScale}}"
     markers="{{markers}}"
-    show-location
     bindmarkertap="onMarkerTap"
   />
 
