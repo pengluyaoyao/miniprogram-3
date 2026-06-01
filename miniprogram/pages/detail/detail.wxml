@@ -51,9 +51,11 @@
   </view>
 
   <view class="bottom-bar" wx:if="{{!loading && !loadError}}">
+    <button class="share-btn" open-type="share">分享好友</button>
+    <button class="share-btn share-timeline-btn" bindtap="onShareTimelineGuide">朋友圈</button>
     <button class="report-btn" bindtap="goReport">举报</button>
     <button class="secondary-btn" bindtap="onFavorite">收藏</button>
-    <button class="primary-btn" bindtap="goContact">发站内留言</button>
+    <button class="primary-btn" bindtap="goContact">留言</button>
   </view>
 
   <view class="tabbar">

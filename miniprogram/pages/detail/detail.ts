@@ -125,6 +125,39 @@ function buildPhotoCells(doc: CloudDoc, listingType: 'provider' | 'request'): Ph
   return []
 }
 
+const SHARE_BRAND = '扫爪入住-宠物寄养信息助手'
+
+function buildShareContent(
+  data: {
+    listingId: string
+    listingType: 'provider' | 'request'
+    heroName: string
+    heroSub: string
+    photoPreviewUrls: string[]
+  },
+  options?: { forTimeline?: boolean }
+) {
+  const { listingId, listingType, heroName, heroSub, photoPreviewUrls } = data
+  const contentTitle =
+    [heroName, heroSub].filter(Boolean).join(' · ') ||
+    (listingType === 'request' ? '宠主寄养需求' : '寄养家庭')
+  let title = contentTitle.slice(0, 32)
+  if (options?.forTimeline) {
+    const sep = ' | '
+    const maxContentLen = Math.max(64 - SHARE_BRAND.length - sep.length, 8)
+    title = `${contentTitle.slice(0, maxContentLen)}${sep}${SHARE_BRAND}`
+  }
+  const path = `/pages/detail/detail?id=${encodeURIComponent(listingId)}&type=${encodeURIComponent(listingType)}`
+  const query = `id=${encodeURIComponent(listingId)}&type=${encodeURIComponent(listingType)}`
+  const imageUrl = photoPreviewUrls.find((u) => /^https:\/\//.test(u)) || ''
+  return {
+    title,
+    path,
+    query,
+    imageUrl,
+  }
+}
+
 Page({
   data: {
     listingId: '',
@@ -164,6 +197,71 @@ Page({
     }
     this.setData({ listingId: id, listingType }, () => {
       this.loadDetail()
+    })
+    this.enableShareMenu()
+  },
+
+  enableShareMenu() {
+    wx.showShareMenu({
+      withShareTicket: false,
+      menus: ['shareAppMessage', 'shareTimeline'],
+    })
+  },
+
+  sharePayload(forTimeline = false) {
+    const { listingId, listingType, heroName, heroSub, photoPreviewUrls, loading, loadError } =
+      this.data
+    if (!listingId || loading || loadError) {
+      return null
+    }
+    return buildShareContent(
+      {
+        listingId,
+        listingType,
+        heroName,
+        heroSub,
+        photoPreviewUrls,
+      },
+      { forTimeline }
+    )
+  },
+
+  onShareAppMessage(): WechatMiniprogram.Page.ICustomShareContent {
+    const share = this.sharePayload()
+    if (!share) {
+      return { title: '宠物寄养', path: '/pages/home/home' }
+    }
+    const ret: WechatMiniprogram.Page.ICustomShareContent = {
+      title: share.title,
+      path: share.path,
+    }
+    if (share.imageUrl) {
+      ret.imageUrl = share.imageUrl
+    }
+    return ret
+  },
+
+  onShareTimeline(): WechatMiniprogram.Page.ICustomTimelineContent {
+    const share = this.sharePayload(true)
+    if (!share) {
+      return { title: SHARE_BRAND, query: '' }
+    }
+    const ret: WechatMiniprogram.Page.ICustomTimelineContent = {
+      title: share.title,
+      query: share.query,
+    }
+    if (share.imageUrl) {
+      ret.imageUrl = share.imageUrl
+    }
+    return ret
+  },
+
+  onShareTimelineGuide() {
+    wx.showModal({
+      title: '分享到朋友圈',
+      content: '请点击右上角「···」，选择「分享到朋友圈」',
+      showCancel: false,
+      confirmText: '知道了',
     })
   },
 
@@ -218,6 +316,7 @@ Page({
               descSectionTitle: '',
               descText: '',
             })
+            this.enableShareMenu()
           })
         } else {
           const petName = String(doc.pet_name || '宠物')
@@ -252,6 +351,7 @@ Page({
               descSectionTitle: '',
               descText: '',
             })
+            this.enableShareMenu()
           })
         }
       })
