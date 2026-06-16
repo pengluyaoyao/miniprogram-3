@@ -1,0 +1,33 @@
+<navigation-bar title="联系我们" back="{{true}}" color="#0f172a" background="#f8fafc"></navigation-bar>
+
+<view class="page">
+  <view class="hero-tip">如有功能建议、使用问题或合作意向，欢迎留言。我们会尽快查看并回复（通过您留下的联系方式）。</view>
+
+  <view class="card">
+    <text class="label">反馈类型</text>
+    <picker mode="selector" range="{{categories}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+      <view class="picker">{{categories[categoryIndex]}}</view>
+    </picker>
+  </view>
+
+  <view class="card">
+    <text class="label">留言内容（必填）</text>
+    <textarea
+      class="area"
+      placeholder="请描述您的问题或建议，至少 5 个字"
+      maxlength="800"
+      value="{{body}}"
+      bindinput="onBody"
+    />
+  </view>
+
+  <view class="card">
+    <text class="label">便于回复的联系方式（选填）</text>
+    <input class="input" type="number" placeholder="手机号" value="{{contactPhone}}" bindinput="onPhone" />
+    <input class="input" placeholder="微信号" value="{{contactWechat}}" bindinput="onWechat" />
+  </view>
+
+  <view class="risk">请勿填写违法违规内容。提交即表示同意平台用于处理您的反馈。</view>
+
+  <button class="submit" loading="{{submitting}}" disabled="{{submitting}}" bindtap="submit">提交留言</button>
+</view>

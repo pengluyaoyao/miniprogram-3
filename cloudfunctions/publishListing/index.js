@@ -20,6 +20,29 @@ function locationFromForm(form) {
   return { ok: true, ...resolved }
 }
 
+function normalizeXhsCopy(raw) {
+  if (!raw || typeof raw !== 'object') {
+    return null
+  }
+  const title = String(raw.title || '').trim().slice(0, 80)
+  const body = String(raw.body || '').trim().slice(0, 2000)
+  const hashtags = Array.isArray(raw.hashtags)
+    ? raw.hashtags.map((t) => String(t || '').trim().slice(0, 30)).filter(Boolean).slice(0, 8)
+    : []
+  const highlights = Array.isArray(raw.highlights)
+    ? raw.highlights.map((t) => String(t || '').trim().slice(0, 20)).filter(Boolean).slice(0, 5)
+    : []
+  if (!title && !body) {
+    return null
+  }
+  return {
+    xhs_title: title,
+    xhs_body: body,
+    xhs_hashtags: hashtags,
+    xhs_highlights: highlights,
+  }
+}
+
 async function assertOwnedListing(db, openid, listingId, listType) {
   const coll = listType === 'provider' ? 'provider_profiles' : 'boarding_requests'
   const ownerField = listType === 'provider' ? 'user_openid' : 'owner_openid'
@@ -64,14 +87,19 @@ exports.main = async (event) => {
       const envPhotos = Array.isArray(p.environmentPhotos)
         ? p.environmentPhotos.map((x) => String(x || '').trim()).filter(Boolean).slice(0, 9)
         : []
-      const textCheck = await checkPublishTexts(cloud, openid, [
+      const xhs = normalizeXhsCopy(event.xhsCopy)
+      const textParts = [
         p.displayName,
         p.acceptPets,
         p.otherServices,
         p.social,
         p.phone,
         p.wechatId,
-      ])
+      ]
+      if (xhs) {
+        textParts.push(xhs.xhs_title, xhs.xhs_body, ...xhs.xhs_hashtags, ...xhs.xhs_highlights)
+      }
+      const textCheck = await checkPublishTexts(cloud, openid, textParts)
       if (!textCheck.ok) {
         return textCheck
       }
@@ -133,6 +161,9 @@ exports.main = async (event) => {
         profile_completeness: 60,
         status: 'published',
         updated_at: now,
+      }
+      if (xhs) {
+        Object.assign(providerData, xhs)
       }
       if (isUpdate) {
         await db.collection('provider_profiles').doc(listingId).update({ data: providerData })

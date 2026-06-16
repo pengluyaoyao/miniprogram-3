@@ -23,6 +23,18 @@
       </view>
     </view>
 
+    <view class="card xhs-card" wx:if="{{showXhsSection}}">
+      <text class="xhs-title" wx:if="{{xhsTitle}}">{{xhsTitle}}</text>
+      <text class="xhs-body" wx:if="{{xhsBody}}" selectable>{{xhsBody}}</text>
+      <view class="xhs-highlights" wx:if="{{xhsHighlights.length}}">
+        <view class="xhs-highlight-item" wx:for="{{xhsHighlights}}" wx:key="*this">{{item}}</view>
+      </view>
+      <view class="xhs-tag-row" wx:if="{{xhsHashtags.length}}">
+        <text class="xhs-tag-chip" wx:for="{{xhsHashtags}}" wx:key="*this">{{item}}</text>
+      </view>
+      <button class="xhs-copy-btn" bindtap="copyXhs">复制文案</button>
+    </view>
+
     <view class="card" wx:if="{{photoCells.length}}">
       <text class="section-title">{{photoSectionTitle}}</text>
       <text class="photo-tip">点击图片可放大查看</text>

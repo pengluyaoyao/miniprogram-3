@@ -1,0 +1,10 @@
+{
+  "name": "generateXhsCopy",
+  "version": "1.0.0",
+  "description": "内容安全检测后调用 MiniMax 生成小红书寄养宣传文案",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "wx-server-sdk": "~2.6.3"
+  }
+}

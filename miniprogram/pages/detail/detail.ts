@@ -110,6 +110,32 @@ function buildRequestInfoRows(doc: CloudDoc): InfoRow[] {
   return rows
 }
 
+type XhsCopyView = {
+  showXhsSection: boolean
+  xhsTitle: string
+  xhsBody: string
+  xhsHashtags: string[]
+  xhsHighlights: string[]
+}
+
+function parseXhsFromDoc(doc: CloudDoc): XhsCopyView {
+  const xhsTitle = String(doc.xhs_title || '').trim()
+  const xhsBody = String(doc.xhs_body || '').trim()
+  const xhsHashtags = Array.isArray(doc.xhs_hashtags)
+    ? (doc.xhs_hashtags as string[]).map((t) => String(t).trim()).filter(Boolean)
+    : []
+  const xhsHighlights = Array.isArray(doc.xhs_highlights)
+    ? (doc.xhs_highlights as string[]).map((t) => String(t).trim()).filter(Boolean)
+    : []
+  return {
+    showXhsSection: !!(xhsTitle || xhsBody),
+    xhsTitle,
+    xhsBody,
+    xhsHashtags,
+    xhsHighlights,
+  }
+}
+
 function buildPhotoCells(doc: CloudDoc, listingType: 'provider' | 'request'): PhotoCell[] {
   if (listingType === 'provider') {
     const urls = ((doc.environment_photos as string[]) || []).filter(isPhotoUrl)
@@ -175,6 +201,11 @@ Page({
     showInfoSection: false,
     descSectionTitle: '简介',
     descText: '',
+    showXhsSection: false,
+    xhsTitle: '',
+    xhsBody: '',
+    xhsHashtags: [] as string[],
+    xhsHighlights: [] as string[],
     msgUnread: 0,
   },
 
@@ -209,16 +240,26 @@ Page({
   },
 
   sharePayload(forTimeline = false) {
-    const { listingId, listingType, heroName, heroSub, photoPreviewUrls, loading, loadError } =
-      this.data
+    const {
+      listingId,
+      listingType,
+      heroName,
+      heroSub,
+      photoPreviewUrls,
+      loading,
+      loadError,
+      xhsTitle,
+    } = this.data
     if (!listingId || loading || loadError) {
       return null
     }
+    const shareName =
+      listingType === 'provider' && xhsTitle ? xhsTitle : heroName
     return buildShareContent(
       {
         listingId,
         listingType,
-        heroName,
+        heroName: shareName,
         heroSub,
         photoPreviewUrls,
       },
@@ -298,6 +339,7 @@ Page({
           const heroSub = [city, years > 0 ? `经验 ${years} 年` : ''].filter(Boolean).join(' · ') || '寄养家庭'
           const infoRows = buildProviderInfoRows(doc)
           const photoCells = buildPhotoCells(doc, 'provider')
+          const xhs = parseXhsFromDoc(doc)
           resolvePhotoCells(photoCells).then((cells) => {
             const photoPreviewUrls = cells.map((c) => c.url).filter((u): u is string => !!u)
             this.setData({
@@ -315,6 +357,7 @@ Page({
               showInfoSection: infoRows.length > 0,
               descSectionTitle: '',
               descText: '',
+              ...xhs,
             })
             this.enableShareMenu()
           })
@@ -350,6 +393,11 @@ Page({
               showInfoSection: infoRows.length > 0,
               descSectionTitle: '',
               descText: '',
+              showXhsSection: false,
+              xhsTitle: '',
+              xhsBody: '',
+              xhsHashtags: [],
+              xhsHighlights: [],
             })
             this.enableShareMenu()
           })
@@ -358,6 +406,21 @@ Page({
       .catch(() => {
         this.setData({ loading: false, loadError: '网络异常，请稍后重试' })
       })
+  },
+
+  copyXhs() {
+    const { xhsTitle, xhsBody, xhsHashtags } = this.data
+    const tags = (xhsHashtags || []).join(' ')
+    const text = `${xhsTitle}\n\n${xhsBody}\n\n${tags}`.trim()
+    if (!text) {
+      return
+    }
+    wx.setClipboardData({
+      data: text,
+      success: () => {
+        wx.showToast({ title: '已复制', icon: 'none' })
+      },
+    })
   },
 
   onPreviewPhoto(e: WechatMiniprogram.BaseEvent) {

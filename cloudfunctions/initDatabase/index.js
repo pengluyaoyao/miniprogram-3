@@ -34,6 +34,7 @@ const COLLECTIONS = [
   'chat_threads',
   'chat_messages',
   'sec_media_checks',
+  'platform_feedback',
 ]
 
 function isCollectionAlreadyExistsError(err) {

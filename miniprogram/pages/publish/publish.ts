@@ -1,6 +1,7 @@
 import { requestNewMessageSubscribe } from '../../constants/subscribeMessage'
 import { callCloud } from '../../utils/cloud'
 import { resolveCloudFileUrls } from '../../utils/cloudImages'
+import { compressAndUploadImages } from '../../utils/uploadImage'
 import { ensureLoggedIn, isLoggedIn } from '../../utils/auth'
 import { refreshMessageBadge } from '../../utils/inboxBadge'
 import {
@@ -16,6 +17,7 @@ import {
   formatBoardingRangeLabel,
   todayYmd,
 } from '../../utils/boardingPeriod'
+import { PUBLISH_PREVIEW_DRAFT_KEY } from '../../constants/publishPreview'
 
 const PUBLISH_REDIRECT = '/pages/publish/publish'
 
@@ -81,7 +83,7 @@ Page({
     editId: '',
     editListType: 'request' as 'provider' | 'request',
     pageTitle: '发布信息',
-    submitBtnText: '提交发布',
+    submitBtnText: '生成文案并发布信息',
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -103,7 +105,7 @@ Page({
         editListType,
         role: editListType === 'provider' ? 'provider' : 'owner',
         pageTitle: isEdit ? '修改发布' : '发布信息',
-        submitBtnText: isEdit ? '保存修改' : '提交发布',
+        submitBtnText: isEdit ? '保存修改' : '生成文案并发布信息',
       })
       if (isEdit) {
         this.loadForEdit(editId, editListType)
@@ -360,20 +362,8 @@ Page({
         if (!paths.length) {
           return
         }
-        wx.showLoading({ title: '上传中' })
-        const uploads = paths.map(
-          (filePath) =>
-            new Promise<string>((resolve, reject) => {
-              const cloudPath = `env/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`
-              wx.cloud.uploadFile({
-                cloudPath,
-                filePath,
-                success: (u) => resolve(u.fileID),
-                fail: reject,
-              })
-            })
-        )
-        Promise.all(uploads)
+        wx.showLoading({ title: '压缩上传中' })
+        compressAndUploadImages(paths, 'env')
           .then((ids) => {
             const cur = prov.envPhotos || []
             this.setData({ 'provider.envPhotos': [...cur, ...ids] }, () => this.syncProviderEnvPhotoDisplay())
@@ -415,20 +405,8 @@ Page({
         if (!paths.length) {
           return
         }
-        wx.showLoading({ title: '上传中' })
-        const uploads = paths.map(
-          (filePath) =>
-            new Promise<string>((resolve, reject) => {
-              const cloudPath = `pet/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`
-              wx.cloud.uploadFile({
-                cloudPath,
-                filePath,
-                success: (u) => resolve(u.fileID),
-                fail: reject,
-              })
-            })
-        )
-        Promise.all(uploads)
+        wx.showLoading({ title: '压缩上传中' })
+        compressAndUploadImages(paths, 'pet')
           .then((ids) => {
             const cur = owner.petPhotos || []
             this.setData({ 'owner.petPhotos': [...cur, ...ids] }, () => this.syncOwnerPetPhotoDisplay())
@@ -498,7 +476,11 @@ Page({
     wechat: string,
     region: ReturnType<typeof getPublishRegion>
   ) {
-    wx.showLoading({ title: '安全检测中…', mask: true })
+    const isProviderNew = this.data.role === 'provider' && !this.data.isEdit
+    wx.showLoading({
+      title: isProviderNew ? '检测并生成文案…' : '安全检测中…',
+      mask: true,
+    })
     this.setData({ submitting: true })
     const locationFields = {
       city: region.city,
@@ -539,8 +521,36 @@ Page({
             },
           }
 
-    callCloud('publishListing', payload)
+    const cloudName = isProviderNew ? 'generateXhsCopy' : 'publishListing'
+    const generatePayload = isProviderNew ? { provider: payload.provider } : payload
+
+    callCloud(cloudName, generatePayload, { slow: isProviderNew })
       .then((res) => {
+        if (isProviderNew) {
+          const r = res.result as {
+            ok?: boolean
+            errMsg?: string
+            copy?: {
+              title?: string
+              body?: string
+              hashtags?: string[]
+              highlights?: string[]
+              coverImagePrompt?: string
+            }
+            publishPayload?: Record<string, unknown>
+          }
+          if (r && r.ok && r.copy && r.publishPayload) {
+            wx.setStorageSync(PUBLISH_PREVIEW_DRAFT_KEY, {
+              copy: r.copy,
+              publishPayload: r.publishPayload,
+            })
+            wx.navigateTo({ url: '/pages/publish-preview/publish-preview' })
+          } else {
+            wx.showToast({ title: r?.errMsg || '文案生成失败', icon: 'none', duration: 2800 })
+          }
+          return
+        }
+
         const r = res.result as { ok?: boolean; errMsg?: string }
         if (r && r.ok) {
           const wasEdit = this.data.isEdit
@@ -565,7 +575,7 @@ Page({
             regionCityIndex: regionInit.regionCityIndex,
             regionDistrictIndex: regionInit.regionDistrictIndex,
             pageTitle: '发布信息',
-            submitBtnText: '提交发布',
+            submitBtnText: '生成文案并发布信息',
           })
           setTimeout(() => wx.reLaunch({ url: '/pages/home/home' }), 800)
         } else {
@@ -574,7 +584,11 @@ Page({
       })
       .catch((err: { errMsg?: string }) => {
         wx.showToast({
-          title: err.errMsg || '请上传并部署云函数 publishListing',
+          title:
+            err.errMsg ||
+            (isProviderNew
+              ? '请上传并部署云函数 generateXhsCopy'
+              : '请上传并部署云函数 publishListing'),
           icon: 'none',
           duration: 2800,
         })

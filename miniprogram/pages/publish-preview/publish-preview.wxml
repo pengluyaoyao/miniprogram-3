@@ -1,0 +1,40 @@
+<navigation-bar title="文案预览" back="{{true}}" color="#0f172a" background="#f8fafc"></navigation-bar>
+
+<view class="page" wx:if="{{loaded}}">
+  <view class="hero-tip">AI 已根据您填写的信息与环境照片生成小红书宣传文案，确认无误后可发布到平台首页。</view>
+
+  <view class="card">
+    <text class="section-label">标题</text>
+    <text class="copy-title">{{copy.title}}</text>
+  </view>
+
+  <view class="card">
+    <text class="section-label">正文</text>
+    <text class="copy-body" selectable>{{copy.body}}</text>
+  </view>
+
+  <view class="card" wx:if="{{copy.highlights.length}}">
+    <text class="section-label">卖点</text>
+    <view class="highlight-list">
+      <view class="highlight-item" wx:for="{{copy.highlights}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{copy.hashtags.length}}">
+    <text class="section-label">话题标签</text>
+    <view class="tag-row">
+      <text class="tag-chip" wx:for="{{copy.hashtags}}" wx:key="*this">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="footer-actions">
+    <button class="secondary-btn" bindtap="goBackEdit">返回修改</button>
+    <button class="secondary-btn" bindtap="copyAll">复制文案</button>
+    <button class="primary-btn" loading="{{publishing}}" bindtap="confirmPublish">确认发布信息</button>
+  </view>
+</view>
+
+<view class="page empty" wx:else>
+  <text class="empty-text">预览数据已失效，请重新填写发布</text>
+  <button class="primary-btn" bindtap="goPublish">去发布</button>
+</view>

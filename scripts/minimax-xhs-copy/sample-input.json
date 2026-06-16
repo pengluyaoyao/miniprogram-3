@@ -1,0 +1,15 @@
+{
+  "role": "provider",
+  "displayName": "小橘家宠物寄养",
+  "locationCity": "上海市浦东新区",
+  "yearsExperience": 3,
+  "acceptPets": ["狗", "猫"],
+  "serviceItems": ["喂药", "接送", "视频"],
+  "otherServices": "每日遛狗、梳毛护理",
+  "envDescription": "独立房间，每日消毒，有监控可视频查看",
+  "priceDescription": "价格线下沟通确认，平台不收款",
+  "imageUrls": [
+    "https://636c-cloud1-d0gv4gw6oac358372-1380239870.tcb.qcloud.la/env/1780409580881_082nzt.jpg?sign=f063a1097ab6cc7802a11c3395c9702a&t=1780638823",
+    "https://636c-cloud1-d0gv4gw6oac358372-1380239870.tcb.qcloud.la/env/1780409580882_87ei7l.jpg?sign=e86bdaed1b2e24e56866482da08bf687&t=1780642560"
+  ]
+}

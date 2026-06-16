@@ -84,6 +84,10 @@ Page({
     wx.navigateTo({ url: path })
   },
 
+  goContactUs() {
+    wx.navigateTo({ url: '/pages/feedback/feedback' })
+  },
+
   goMyPets() {
     wx.showToast({ title: '宠物档案功能开发中', icon: 'none' })
   },
