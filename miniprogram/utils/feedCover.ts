@@ -100,7 +100,8 @@ export function estimateCardHeight(
   const coverH = Math.round((COLUMN_WIDTH_RPX * coverPaddingPercent) / 100)
   const titleLines = name.length > 15 ? 2 : 1
   const titleH = titleLines * 40
-  const tagH = tags.length > 0 ? 40 : 0
+  const tagRows = tags.length > 0 ? Math.ceil(tags.length / 2) : 0
+  const tagH = tagRows > 0 ? tagRows * 32 + (tagRows - 1) * 8 : 0
   const cityH = 28
   return coverH + BODY_BASE_RPX + titleH + tagH + cityH
 }
@@ -115,8 +116,7 @@ function mapDocToWaterfallCard(
 ): WaterfallCard {
   const id = doc._id as string
   const coverUrl = pickFirstImageUrl(doc[photoField])
-  const maxTags = listType === 'request' ? 3 : 2
-  const tagSlice = tags.slice(0, maxTags)
+  const tagSlice = tags.filter((t) => String(t || '').trim())
   const coverPaddingPercent = stableCoverPaddingPercent(id)
   return {
     _id: id,
@@ -136,7 +136,9 @@ function mapDocToWaterfallCard(
 }
 
 export function mapProviderToWaterfall(doc: FeedCloudDoc): WaterfallCard {
-  const tags = ((doc.service_tags as string[]) || []).slice(0, 4)
+  const tags = ((doc.service_tags as string[]) || [])
+    .map((t) => String(t || '').trim())
+    .filter(Boolean)
   const tagSlice = tags.length ? tags : ['家庭寄养']
   return mapDocToWaterfallCard(
     doc,

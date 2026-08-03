@@ -1,0 +1,9 @@
+{
+  "name": "seedProviderProfiles",
+  "version": "1.0.0",
+  "description": "一次性导入小红书整理的寄养家庭种子数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -12,7 +12,7 @@ const TEXT_SYSTEM_PROMPT = `你是一位资深小红书宠物内容运营，同�
 - JSON 必须严格合法：字符串内换行用 \\n 表示，禁止在 JSON 字符串里写真实换行；字符串内双引号须写成 \\"。
 - JSON 字段：
   - title: string，标题，15～22 字，吸引毛孩子家长点击
-  - body: string，正文，100 字，分段，可用 emoji，语气真诚、温暖、专业
+  - body: string，正文，100～150 字，分段，可用 emoji，语气真诚、温暖、专业
   - hashtags: string[]，3～6 个小红书话题标签，每项以 # 开头
   - highlights: string[]，3 条卖点短句，每条 ≤16 字
   - coverImagePrompt: string，用于文生图的英文或中文画面描述（温馨寄养场景、无文字水印、无手机号微信号）

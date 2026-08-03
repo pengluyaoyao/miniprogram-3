@@ -7,8 +7,9 @@
 | `initDatabase` | 创建 PRD 第八节 10 个数据库集合 |
 | `upsertUser` | 登录时按 OPENID 写入/更新 `users` |
 | `publishListing` | 发布页提交：写入 `provider_profiles` 或 `boarding_requests`；寄养家庭可附带 `xhsCopy` 写入 `xhs_title` / `xhs_body` / `xhs_hashtags` / `xhs_highlights` 供详情页展示 |
-| `generateXhsCopy` | 寄养家庭新建发布：内容安全检测通过后调用 MiniMax 生成小红书文案，返回预览数据（不写入库） |
-| `getPublishedFeed` | 首页：无 `cityQuery` → 寄养家庭/宠主需求各最多 50 条；有 `cityQuery` → 按 `location_city` 子串筛选。均不按距离排序，返回 `distance_label` 为市区文案（`lat`/`lng` 仍写入库供后续扩展） |
+| `generateXhsCopy` | （暂未接入小程序）MiniMax 生成小红书文案；代码保留供日后启用 |
+| `getPublishedFeed` | 首页分页：参数 `skip`/`limit`（默认 50）、`cityQuery`、`listType`；市区搜索支持省略「市/区」，如「北京朝阳」匹配「北京市朝阳区」 |
+| `seedProviderProfiles` | 一次性导入 `xhs_profiles.json`（175 条小红书整理数据）到 `provider_profiles`；需 `confirm: SEED_XHS_PROFILES_V1` |
 | `getListingDetail` | 详情页：按 `id` + `listingType` 拉取单条已发布记录 |
 | `getMyBoardingRequests` | 当前用户宠主需求（旧，可由 `getMyPublications` 替代） |
 | `getMyPublications` | 「我的发布」：当前用户全部 `boarding_requests` + `provider_profiles` |
@@ -53,17 +54,34 @@
    - 发布带图信息时，云函数日志不应频繁出现 `mediaCheckAsync timeout, sync fallback`  
    - 若 `suggest` 为空，代码会对该张图单独走同步兜底，不再直接判失败
 
-## `generateXhsCopy`（寄养家庭文案生成）
+## `seedProviderProfiles`（小红书种子数据）
 
-- **触发**：发布页寄养家庭角色、新建（非编辑）点「生成文案并发布信息」→ 本函数先做与 `publishListing` 相同的内容安全检测，通过后调用 MiniMax 生成小红书文案 JSON，**不入库**。
-- **预览页**：小程序跳转 `pages/publish-preview/publish-preview`，用户点「确认发布信息」再调 `publishListing` 写入 `provider_profiles`。
+- **数据**：`cloudfunctions/seedProviderProfiles/xhs_profiles.json`（175 条，源自 `xiaohongshu_boarding_profiles_from_comments(1).json`）
+- **写入集合**：`provider_profiles`（`status: published`，`user_openid: ofDVP12SiQNSpXheJGORXnJhhJcI`）
+- **部署**：右键 `seedProviderProfiles` → **上传并部署：云端安装依赖**（超时 60s）
+- **调用**（云开发控制台 → 云函数 → 测试）：
+  1. 先试跑：`{ "confirm": "SEED_XHS_PROFILES_V1", "dryRun": true, "limit": 3 }`
+  2. 正式导入：`{ "confirm": "SEED_XHS_PROFILES_V1" }`
+  3. 分批：`{ "confirm": "SEED_XHS_PROFILES_V1", "offset": 0, "limit": 50 }`
+- **注意**：重复执行会插入重复记录；仅建议在空库或测试环境执行一次。
+
+## `getPublishedFeed` 分页与索引
+
+- 首页滚动到底部自动加载下一页（每页 50 条）。
+- 若 `orderBy('created_at')` 报错，请在云开发控制台为 `provider_profiles` / `boarding_requests` 添加组合索引：`status` + `created_at`（降序）。
+
+## `generateXhsCopy`（暂未启用，代码保留）
+
+当前发布页寄养家庭新建仍直接调用 **`publishListing`**（内容安全检测通过后入库）。本函数与 `pages/publish-preview` 预览页保留，日后可在 `publish.ts` 重新接入。
+
+- **设计流程**：内容安全检测 → MiniMax 生成文案 JSON（不入库）→ 预览页确认 → `publishListing` 写入 `provider_profiles` 及 `xhs_*` 字段。
 - **环境变量**（云开发控制台 → 云函数 → `generateXhsCopy` → 配置）：
   - `MINIMAX_API_KEY`（必填）
   - `MINIMAX_BASE_URL` 可选，默认 `https://api.minimaxi.com`
   - `MINIMAX_TEXT_MODEL` 默认 `MiniMax-M2.5`（无环境图时）
   - `MINIMAX_VISION_MODEL` 默认 `MiniMax-M3`（有环境图时图文识图）
-- **部署**：右键 `generateXhsCopy` → **上传并部署：云端安装依赖**（含 `axios`），超时已设 60s。本函数目录内自带 `districtCenters.js` / `contentSecurity.js` / `regions.json` 副本（与 `publishListing` 同步维护，勿引用兄弟目录）。
-- **若日志出现 `timed out after 3 seconds`**：说明云端执行超时仍为默认 3s。请在 **云开发控制台 → 云函数 → generateXhsCopy → 函数配置** 将超时改为 **60 秒** 并保存，然后重新上传部署；小程序端已对 `generateXhsCopy` / 确认发布使用 `callFunction({ slow: true })`。
+- **部署**：右键 `generateXhsCopy` → **上传并部署：云端安装依赖**（含 `axios`），超时建议 60s。本函数目录内自带 `districtCenters.js` / `contentSecurity.js` / `regions.json` 副本（与 `publishListing` 同步维护，勿引用兄弟目录）。
+- **本地调试**：`npm run minimax:xhs`（见 `scripts/minimax-xhs-copy/`）。
 
 ## `errCode: 50010` / `FunctionName parameter could not be found`
 
@@ -71,7 +89,7 @@
 
 1. **未上传部署**  
    在微信开发者工具左侧展开 `cloudfunctions`，对下列函数右键 → **上传并部署：云端安装依赖**（有 `package.json` 时）：  
-   `upsertUser` / `initDatabase` / `publishListing` / `generateXhsCopy` / `mediaCheckCallback` / `getPublishedFeed` / `getListingDetail` / `getMyPublications` / `getMyListingForEdit` / `deleteMyListing` / `getMyFavorites` / `addFavorite` / `getMyReports` / `submitReport` / `submitFeedback` / `chatSend` / `chatLoad` / `chatInbox` / `chatMarkRead`。
+   `upsertUser` / `initDatabase` / `publishListing` / `generateXhsCopy` / `seedProviderProfiles` / `mediaCheckCallback` / `getPublishedFeed` / `getListingDetail` / `getMyPublications` / `getMyListingForEdit` / `deleteMyListing` / `getMyFavorites` / `addFavorite` / `getMyReports` / `submitReport` / `submitFeedback` / `chatSend` / `chatLoad` / `chatInbox` / `chatMarkRead`。
 
 2. **环境与代码不一致**  
    小程序 `miniprogram/constants/cloudEnv.ts` 中的 `CLOUD_ENV_ID` 必须与开发者工具里云开发所选环境一致；`callFunction` 已显式传入 `config: { env: CLOUD_ENV_ID }`。

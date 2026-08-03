@@ -39,14 +39,13 @@ function formatPetTypes(types: unknown): string {
   return list.map((t) => map[t] || t).join('、')
 }
 
-const PROVIDER_STANDARD_SERVICES = ['喂药', '接送', '视频', '摄像头'] as const
-
-function providerStandardServiceTags(doc: CloudDoc): string[] {
-  const all = ((doc.service_tags as string[]) || []).map((t) => String(t).trim()).filter(Boolean)
-  return PROVIDER_STANDARD_SERVICES.filter((s) => all.includes(s))
+function providerServiceTags(doc: CloudDoc): string[] {
+  const tags = ((doc.service_tags as string[]) || []).map((t) => String(t).trim()).filter(Boolean)
+  return tags.length ? tags : ['家庭寄养']
 }
 
 function providerOtherServiceTags(doc: CloudDoc): string[] {
+  const PROVIDER_STANDARD_SERVICES = ['喂药', '接送', '视频', '摄像头']
   const all = ((doc.service_tags as string[]) || []).map((t) => String(t).trim()).filter(Boolean)
   const standard = new Set<string>(PROVIDER_STANDARD_SERVICES)
   return all.filter((t) => !standard.has(t) && t !== '家庭寄养')
@@ -54,6 +53,7 @@ function providerOtherServiceTags(doc: CloudDoc): string[] {
 
 function buildProviderInfoRows(doc: CloudDoc): InfoRow[] {
   const rows: InfoRow[] = []
+  const PROVIDER_STANDARD_SERVICES = ['喂药', '接送', '视频', '摄像头']
   pushInfoRow(rows, '寄养家庭名称', doc.display_name)
   pushInfoRow(rows, '所在市区', doc.location_city)
   const years = Number(doc.years_experience) || 0
@@ -64,23 +64,24 @@ function buildProviderInfoRows(doc: CloudDoc): InfoRow[] {
   if (pets) {
     pushInfoRow(rows, '可接收宠物', pets)
   }
-  const serviceItems = providerStandardServiceTags(doc)
+  const allTags = ((doc.service_tags as string[]) || []).map((t) => String(t).trim()).filter(Boolean)
+  const serviceItems = PROVIDER_STANDARD_SERVICES.filter((s) => allTags.includes(s))
   if (serviceItems.length) {
     pushInfoRow(rows, '服务项目', serviceItems.join('、'))
   }
-  const otherServices = providerOtherServiceTags(doc)
-  if (otherServices.length) {
-    pushInfoRow(rows, '其他服务', otherServices.join('、'))
+  const envDesc = String(doc.env_description || '').trim()
+  const isPhotoPlaceholder = envDesc === '详见上传的环境照片'
+  const legacyOther = providerOtherServiceTags(doc)
+  if (envDesc && !isPhotoPlaceholder) {
+    pushInfoRow(rows, '其他服务和介绍', envDesc)
+  } else if (legacyOther.length) {
+    pushInfoRow(rows, '其他服务和介绍', legacyOther.join('、'))
   }
   const tags = ((doc.service_tags as string[]) || []).map((t) => String(t).trim()).filter(Boolean)
   const summary = String(doc.service_summary || '').trim()
   const tagLine = tags.join('、')
   if (summary && summary !== tagLine) {
     pushInfoRow(rows, '服务说明', summary)
-  }
-  const envDesc = String(doc.env_description || '').trim()
-  if (envDesc && envDesc !== '详见上传的环境照片') {
-    pushInfoRow(rows, '环境说明', envDesc)
   }
   pushInfoRow(rows, '价格说明', doc.price_description || '价格线下沟通确认，平台不收款')
   pushInfoRow(rows, '手机号', doc.phone)
@@ -108,32 +109,6 @@ function buildRequestInfoRows(doc: CloudDoc): InfoRow[] {
   pushInfoRow(rows, '微信号', doc.wechat_id)
   pushInfoRow(rows, '社交账号', doc.social_accounts)
   return rows
-}
-
-type XhsCopyView = {
-  showXhsSection: boolean
-  xhsTitle: string
-  xhsBody: string
-  xhsHashtags: string[]
-  xhsHighlights: string[]
-}
-
-function parseXhsFromDoc(doc: CloudDoc): XhsCopyView {
-  const xhsTitle = String(doc.xhs_title || '').trim()
-  const xhsBody = String(doc.xhs_body || '').trim()
-  const xhsHashtags = Array.isArray(doc.xhs_hashtags)
-    ? (doc.xhs_hashtags as string[]).map((t) => String(t).trim()).filter(Boolean)
-    : []
-  const xhsHighlights = Array.isArray(doc.xhs_highlights)
-    ? (doc.xhs_highlights as string[]).map((t) => String(t).trim()).filter(Boolean)
-    : []
-  return {
-    showXhsSection: !!(xhsTitle || xhsBody),
-    xhsTitle,
-    xhsBody,
-    xhsHashtags,
-    xhsHighlights,
-  }
 }
 
 function buildPhotoCells(doc: CloudDoc, listingType: 'provider' | 'request'): PhotoCell[] {
@@ -201,11 +176,6 @@ Page({
     showInfoSection: false,
     descSectionTitle: '简介',
     descText: '',
-    showXhsSection: false,
-    xhsTitle: '',
-    xhsBody: '',
-    xhsHashtags: [] as string[],
-    xhsHighlights: [] as string[],
     msgUnread: 0,
   },
 
@@ -248,18 +218,15 @@ Page({
       photoPreviewUrls,
       loading,
       loadError,
-      xhsTitle,
     } = this.data
     if (!listingId || loading || loadError) {
       return null
     }
-    const shareName =
-      listingType === 'provider' && xhsTitle ? xhsTitle : heroName
     return buildShareContent(
       {
         listingId,
         listingType,
-        heroName: shareName,
+        heroName,
         heroSub,
         photoPreviewUrls,
       },
@@ -334,12 +301,11 @@ Page({
         const lt = (r.listingType === 'request' ? 'request' : 'provider') as 'provider' | 'request'
         if (lt === 'provider') {
           const years = Number(doc.years_experience) || 0
-          const tagList = providerStandardServiceTags(doc)
+          const tagList = providerServiceTags(doc)
           const city = String(doc.location_city || '').trim()
           const heroSub = [city, years > 0 ? `经验 ${years} 年` : ''].filter(Boolean).join(' · ') || '寄养家庭'
           const infoRows = buildProviderInfoRows(doc)
           const photoCells = buildPhotoCells(doc, 'provider')
-          const xhs = parseXhsFromDoc(doc)
           resolvePhotoCells(photoCells).then((cells) => {
             const photoPreviewUrls = cells.map((c) => c.url).filter((u): u is string => !!u)
             this.setData({
@@ -357,7 +323,6 @@ Page({
               showInfoSection: infoRows.length > 0,
               descSectionTitle: '',
               descText: '',
-              ...xhs,
             })
             this.enableShareMenu()
           })
@@ -393,11 +358,6 @@ Page({
               showInfoSection: infoRows.length > 0,
               descSectionTitle: '',
               descText: '',
-              showXhsSection: false,
-              xhsTitle: '',
-              xhsBody: '',
-              xhsHashtags: [],
-              xhsHighlights: [],
             })
             this.enableShareMenu()
           })
@@ -406,21 +366,6 @@ Page({
       .catch(() => {
         this.setData({ loading: false, loadError: '网络异常，请稍后重试' })
       })
-  },
-
-  copyXhs() {
-    const { xhsTitle, xhsBody, xhsHashtags } = this.data
-    const tags = (xhsHashtags || []).join(' ')
-    const text = `${xhsTitle}\n\n${xhsBody}\n\n${tags}`.trim()
-    if (!text) {
-      return
-    }
-    wx.setClipboardData({
-      data: text,
-      success: () => {
-        wx.showToast({ title: '已复制', icon: 'none' })
-      },
-    })
   },
 
   onPreviewPhoto(e: WechatMiniprogram.BaseEvent) {

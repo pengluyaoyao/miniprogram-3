@@ -119,20 +119,13 @@ exports.main = async (event) => {
       const svcPickup = !!p.svcPickup
       const svcVideo = !!p.svcVideo
       const svcCamera = !!p.svcCamera
-      const otherSvc = String(p.otherServices || '')
-        .split(/[,，、]/)
-        .map((s) => s.trim())
-        .filter(Boolean)
+      const intro = String(p.otherServices || '').trim().slice(0, 500)
       const serviceTags = []
       if (svcMed) serviceTags.push('喂药')
       if (svcPickup) serviceTags.push('接送')
       if (svcVideo) serviceTags.push('视频')
       if (svcCamera) serviceTags.push('摄像头')
-      otherSvc.forEach((t) => {
-        if (t && !serviceTags.includes(t)) serviceTags.push(t.slice(0, 20))
-      })
-      const summaryParts = serviceTags.slice()
-      const serviceSummary = summaryParts.join('、').slice(0, 200) || '家庭寄养'
+      const serviceSummary = serviceTags.join('、').slice(0, 200) || '家庭寄养'
 
       const providerData = {
         display_name: String(p.displayName || '寄养家庭').slice(0, 40),
@@ -150,7 +143,7 @@ exports.main = async (event) => {
         service_tags: serviceTags.length ? serviceTags : ['家庭寄养'],
         environment_photos: envPhotos,
         service_summary: serviceSummary,
-        env_description: envPhotos.length ? '详见上传的环境照片' : '',
+        env_description: intro || (envPhotos.length ? '详见上传的环境照片' : ''),
         price_description: '价格线下沟通确认，平台不收款',
         phone,
         wechat_id: wechatId,

@@ -5,23 +5,39 @@ export type { FeedCloudDoc } from './feedLoadTypes'
 
 export type FeedSearchMode = 'all' | 'city'
 
+export const FEED_PAGE_SIZE = 50
+
 export type PublishedFeedResult = {
   ok: boolean
   providers: FeedCloudDoc[]
   requests: FeedCloudDoc[]
   searchMode: FeedSearchMode
   cityQuery: string
+  skip: number
+  limit: number
+  providerTotal: number
+  requestTotal: number
+  hasMoreProviders: boolean
+  hasMoreRequests: boolean
   errMsg?: string
 }
 
 export type LoadFeedOptions = {
-  /** 有值时按 location_city 子串筛选；无值则各返回最多 50 条 */
+  /** 有值时按 location_city 子串筛选 */
   cityQuery?: string
+  /** 分页偏移，默认 0 */
+  skip?: number
+  /** 每页条数，默认 50，最大 50 */
+  limit?: number
+  /** 仅拉取某一类列表（加载更多时使用） */
+  listType?: 'provider' | 'request'
 }
 
 function parseCloudResult(
   res: WechatMiniprogram.ICloud.CallFunctionResult,
-  cityQuery: string
+  cityQuery: string,
+  skip: number,
+  limit: number
 ): PublishedFeedResult {
   const r = res.result as {
     ok?: boolean
@@ -29,6 +45,12 @@ function parseCloudResult(
     requests?: FeedCloudDoc[]
     searchMode?: FeedSearchMode
     cityQuery?: string
+    skip?: number
+    limit?: number
+    providerTotal?: number
+    requestTotal?: number
+    hasMoreProviders?: boolean
+    hasMoreRequests?: boolean
     errMsg?: string
   }
   if (!r || !r.ok) {
@@ -38,6 +60,12 @@ function parseCloudResult(
       requests: [],
       searchMode: cityQuery ? 'city' : 'all',
       cityQuery,
+      skip,
+      limit,
+      providerTotal: 0,
+      requestTotal: 0,
+      hasMoreProviders: false,
+      hasMoreRequests: false,
       errMsg: (r && r.errMsg) || '加载失败',
     }
   }
@@ -47,22 +75,52 @@ function parseCloudResult(
     requests: Array.isArray(r.requests) ? r.requests : [],
     searchMode: r.searchMode === 'city' ? 'city' : 'all',
     cityQuery: r.cityQuery || cityQuery,
+    skip: typeof r.skip === 'number' ? r.skip : skip,
+    limit: typeof r.limit === 'number' ? r.limit : limit,
+    providerTotal: typeof r.providerTotal === 'number' ? r.providerTotal : 0,
+    requestTotal: typeof r.requestTotal === 'number' ? r.requestTotal : 0,
+    hasMoreProviders: !!r.hasMoreProviders,
+    hasMoreRequests: !!r.hasMoreRequests,
   }
 }
 
-/** 默认各最多 50 条；传 cityQuery 时按市区筛选，均不按距离排序 */
+/** 分页拉取已发布列表，默认每页 50 条 */
 export function loadPublishedFeed(options?: LoadFeedOptions): Promise<PublishedFeedResult> {
   const cityQuery = (options?.cityQuery || '').trim()
-  return callCloud('getPublishedFeed', { cityQuery }).then((cloudRes) =>
-    parseCloudResult(cloudRes, cityQuery)
+  const skip = Math.max(0, options?.skip ?? 0)
+  const limit = Math.min(FEED_PAGE_SIZE, Math.max(1, options?.limit ?? FEED_PAGE_SIZE))
+  const payload: Record<string, unknown> = { cityQuery, skip, limit }
+  if (options?.listType === 'provider' || options?.listType === 'request') {
+    payload.listType = options.listType
+  }
+  return callCloud('getPublishedFeed', payload).then((cloudRes) =>
+    parseCloudResult(cloudRes, cityQuery, skip, limit)
   )
 }
 
-export function feedLocationHint(searchMode: FeedSearchMode, cityQuery: string): string {
+export function feedLocationHint(
+  searchMode: FeedSearchMode,
+  cityQuery: string,
+  feedType: 'provider' | 'request',
+  listCount: number,
+  total: number,
+  hasMore: boolean
+): string {
   if (searchMode === 'city' && cityQuery) {
+    if (total > 0) {
+      return hasMore
+        ? `筛选「${cityQuery}」· 已加载 ${listCount}/${total} 条`
+        : `筛选「${cityQuery}」· 共 ${listCount} 条`
+    }
     return `筛选「${cityQuery}」`
   }
-  return '全部 · 各最多 50 条'
+  const label = feedType === 'provider' ? '寄养家庭' : '宠主需求'
+  if (total > 0) {
+    return hasMore
+      ? `${label} · 已加载 ${listCount}/${total} 条`
+      : `${label} · 共 ${listCount} 条`
+  }
+  return `${label} · 每页 ${FEED_PAGE_SIZE} 条`
 }
 
 /** 卡片上展示的市区文案 */

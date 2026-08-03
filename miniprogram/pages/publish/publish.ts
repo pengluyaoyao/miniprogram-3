@@ -17,8 +17,6 @@ import {
   formatBoardingRangeLabel,
   todayYmd,
 } from '../../utils/boardingPeriod'
-import { PUBLISH_PREVIEW_DRAFT_KEY } from '../../constants/publishPreview'
-
 const PUBLISH_REDIRECT = '/pages/publish/publish'
 
 const emptyOwner = () => {
@@ -83,7 +81,7 @@ Page({
     editId: '',
     editListType: 'request' as 'provider' | 'request',
     pageTitle: '发布信息',
-    submitBtnText: '生成文案并发布信息',
+    submitBtnText: '发布信息',
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -105,7 +103,7 @@ Page({
         editListType,
         role: editListType === 'provider' ? 'provider' : 'owner',
         pageTitle: isEdit ? '修改发布' : '发布信息',
-        submitBtnText: isEdit ? '保存修改' : '生成文案并发布信息',
+        submitBtnText: isEdit ? '保存修改' : '发布信息',
       })
       if (isEdit) {
         this.loadForEdit(editId, editListType)
@@ -158,9 +156,14 @@ Page({
 
         if (listType === 'provider') {
           const tags = ((doc.service_tags as string[]) || []) as string[]
-          const other = tags.filter(
-            (t) => !['喂药', '接送', '视频', '摄像头'].includes(t)
+          const envDesc = String(doc.env_description || '').trim()
+          const isPhotoPlaceholder = envDesc === '详见上传的环境照片'
+          const legacyOther = tags.filter(
+            (t) => !['喂药', '接送', '视频', '摄像头', '家庭寄养'].includes(t)
           )
+          const otherServices = isPhotoPlaceholder
+            ? legacyOther.join('、')
+            : envDesc || legacyOther.join('、')
           this.setData({
             ...regionPatch,
             provider: {
@@ -171,7 +174,7 @@ Page({
               svcPickup: tags.includes('接送'),
               svcVideo: tags.includes('视频'),
               svcCamera: tags.includes('摄像头'),
-              otherServices: other.join('、'),
+              otherServices,
               envPhotos: ((doc.environment_photos as string[]) || []).slice(),
               envPhotoDisplay: [],
             },
@@ -476,11 +479,7 @@ Page({
     wechat: string,
     region: ReturnType<typeof getPublishRegion>
   ) {
-    const isProviderNew = this.data.role === 'provider' && !this.data.isEdit
-    wx.showLoading({
-      title: isProviderNew ? '检测并生成文案…' : '安全检测中…',
-      mask: true,
-    })
+    wx.showLoading({ title: '安全检测中…', mask: true })
     this.setData({ submitting: true })
     const locationFields = {
       city: region.city,
@@ -521,36 +520,8 @@ Page({
             },
           }
 
-    const cloudName = isProviderNew ? 'generateXhsCopy' : 'publishListing'
-    const generatePayload = isProviderNew ? { provider: payload.provider } : payload
-
-    callCloud(cloudName, generatePayload, { slow: isProviderNew })
+    callCloud('publishListing', payload)
       .then((res) => {
-        if (isProviderNew) {
-          const r = res.result as {
-            ok?: boolean
-            errMsg?: string
-            copy?: {
-              title?: string
-              body?: string
-              hashtags?: string[]
-              highlights?: string[]
-              coverImagePrompt?: string
-            }
-            publishPayload?: Record<string, unknown>
-          }
-          if (r && r.ok && r.copy && r.publishPayload) {
-            wx.setStorageSync(PUBLISH_PREVIEW_DRAFT_KEY, {
-              copy: r.copy,
-              publishPayload: r.publishPayload,
-            })
-            wx.navigateTo({ url: '/pages/publish-preview/publish-preview' })
-          } else {
-            wx.showToast({ title: r?.errMsg || '文案生成失败', icon: 'none', duration: 2800 })
-          }
-          return
-        }
-
         const r = res.result as { ok?: boolean; errMsg?: string }
         if (r && r.ok) {
           const wasEdit = this.data.isEdit
@@ -575,7 +546,7 @@ Page({
             regionCityIndex: regionInit.regionCityIndex,
             regionDistrictIndex: regionInit.regionDistrictIndex,
             pageTitle: '发布信息',
-            submitBtnText: '生成文案并发布信息',
+            submitBtnText: '发布信息',
           })
           setTimeout(() => wx.reLaunch({ url: '/pages/home/home' }), 800)
         } else {
@@ -584,11 +555,7 @@ Page({
       })
       .catch((err: { errMsg?: string }) => {
         wx.showToast({
-          title:
-            err.errMsg ||
-            (isProviderNew
-              ? '请上传并部署云函数 generateXhsCopy'
-              : '请上传并部署云函数 publishListing'),
+          title: err.errMsg || '请上传并部署云函数 publishListing',
           icon: 'none',
           duration: 2800,
         })

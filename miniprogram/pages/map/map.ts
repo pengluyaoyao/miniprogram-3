@@ -227,7 +227,14 @@ Page({
               rawProviders: [],
               rawRequests: [],
               searchMode: cityQuery ? 'city' : 'all',
-              locationHint: feedLocationHint(cityQuery ? 'city' : 'all', cityQuery || ''),
+              locationHint: feedLocationHint(
+                cityQuery ? 'city' : 'all',
+                cityQuery || '',
+                this.data.mapType,
+                0,
+                0,
+                false
+              ),
             },
             () => {
               this.setMarkersForType(this.data.mapType)
@@ -249,7 +256,14 @@ Page({
           rawProviders: r.providers,
           rawRequests: r.requests,
           searchMode: r.searchMode,
-          locationHint: feedLocationHint(r.searchMode, r.cityQuery),
+          locationHint: feedLocationHint(
+            r.searchMode,
+            r.cityQuery,
+            this.data.mapType,
+            this.data.mapType === 'provider' ? r.providers.length : r.requests.length,
+            this.data.mapType === 'provider' ? r.providerTotal : r.requestTotal,
+            this.data.mapType === 'provider' ? r.hasMoreProviders : r.hasMoreRequests
+          ),
           lat: viewport.lat,
           lng: viewport.lng,
           mapScale: viewport.scale,

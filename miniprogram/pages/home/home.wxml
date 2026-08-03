@@ -13,7 +13,7 @@
     <view class="city-search">
     <input
       class="city-input"
-      placeholder="搜索市区，如：浦东新区"
+      placeholder="搜索市区，如：北京朝阳、浦东新区"
       value="{{cityInput}}"
       confirm-type="search"
       bindinput="onCityInput"
@@ -41,7 +41,9 @@
         </view>
       </view>
 
-      <text class="list-heading" wx:if="{{listCount > 0}}">共 {{listCount}} 条</text>
+      <text class="list-heading" wx:if="{{listCount > 0}}">
+        已加载 {{listCount}}<text wx:if="{{feedTotal > 0}}"> / {{feedTotal}}</text> 条
+      </text>
       <view wx:if="{{listCount === 0}}" class="empty-tab">
         <text wx:if="{{searchMode === 'city'}}">「{{activeCityQuery}}」暂无{{feedType === 'provider' ? '寄养家庭' : '宠主需求'}}。</text>
         <text wx:else>暂无{{feedType === 'provider' ? '寄养家庭' : '宠主需求'}}。</text>
@@ -55,6 +57,8 @@
       style="height: {{scrollViewHeight}}px;"
       enhanced
       show-scrollbar="{{false}}"
+      lower-threshold="120"
+      bindscrolltolower="onFeedScrollToLower"
     >
       <view class="waterfall">
         <view class="waterfall-col">
@@ -131,6 +135,12 @@
             </view>
           </view>
         </view>
+      </view>
+      <view class="feed-footer" wx:if="{{loadingMore}}">
+        <text class="feed-footer-text">加载中…</text>
+      </view>
+      <view class="feed-footer" wx:elif="{{!hasMore && listCount >= 50}}">
+        <text class="feed-footer-text">已加载全部</text>
       </view>
     </scroll-view>
   </block>

@@ -79,7 +79,7 @@
         </picker>
       </view>
       <text class="field-hint" wx:if="{{owner.boardingPeriodLabel}}">已选：{{owner.boardingPeriodLabel}}</text>
-      <textarea class="textarea" placeholder="寄养需求说明" value="{{owner.description}}" data-role="owner" data-field="description" bindinput="onFormField" />
+      <textarea class="textarea" placeholder="宠主有什么需求？" value="{{owner.description}}" data-role="owner" data-field="description" bindinput="onFormField" />
     </view>
     <view wx:else>
       <text class="field-label">服务项目（多选）</text>
@@ -89,8 +89,18 @@
         <view class="svc-chip {{provider.svcVideo ? 'svc-on' : ''}}" data-field="svcVideo" bindtap="toggleProviderSvc">视频</view>
         <view class="svc-chip {{provider.svcCamera ? 'svc-on' : ''}}" data-field="svcCamera" bindtap="toggleProviderSvc">摄像头</view>
       </view>
-      <text class="field-label">其他服务</text>
-      <input class="input" placeholder="可填写其他服务，多个用逗号分隔" value="{{provider.otherServices}}" data-role="provider" data-field="otherServices" bindinput="onFormField" />
+      <text class="field-label">其他服务和介绍</text>
+      <textarea
+        class="textarea textarea-intro"
+        placeholder="真诚的介绍是信任的开始哦～"
+        value="{{provider.otherServices}}"
+        data-role="provider"
+        data-field="otherServices"
+        bindinput="onFormField"
+        auto-height
+        maxlength="500"
+        show-confirm-bar="{{false}}"
+      />
       <text class="field-label">寄养环境照片（选填）</text>
       <view class="photo-actions">
         <button class="secondary-btn photo-btn" bindtap="chooseEnvPhotos">选择照片并上传</button>

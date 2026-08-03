@@ -1,6 +1,7 @@
 import { refreshMessageBadge } from '../../utils/inboxBadge'
 import {
   feedLocationHint,
+  FEED_PAGE_SIZE,
   loadPublishedFeed,
   type FeedCloudDoc,
   type FeedSearchMode,
@@ -17,8 +18,13 @@ import {
 
 let rawProvidersCache: FeedCloudDoc[] = []
 let rawRequestsCache: FeedCloudDoc[] = []
+let providerHasMore = false
+let requestHasMore = false
+let providerTotal = 0
+let requestTotal = 0
 let layoutCardsCache: WaterfallCard[] = []
 let relayoutTimer: ReturnType<typeof setTimeout> | null = null
+let loadingMore = false
 
 Page({
   data: {
@@ -29,8 +35,11 @@ Page({
     cityInput: '',
     activeCityQuery: '',
     searchMode: 'all' as FeedSearchMode,
-    locationHint: '全部 · 各最多 50 条',
+    locationHint: '寄养家庭 · 每页 50 条',
     loading: false,
+    loadingMore: false,
+    hasMore: false,
+    feedTotal: 0,
     empty: false,
     msgUnread: 0,
     scrollViewHeight: 400,
@@ -62,6 +71,26 @@ Page({
     })
   },
 
+  syncFeedMeta() {
+    const feedType = this.data.feedType
+    const listCount = feedType === 'provider' ? rawProvidersCache.length : rawRequestsCache.length
+    const feedTotal = feedType === 'provider' ? providerTotal : requestTotal
+    const hasMore = feedType === 'provider' ? providerHasMore : requestHasMore
+    this.setData({
+      listCount,
+      feedTotal,
+      hasMore,
+      locationHint: feedLocationHint(
+        this.data.searchMode,
+        this.data.activeCityQuery,
+        feedType,
+        listCount,
+        feedTotal,
+        hasMore
+      ),
+    })
+  },
+
   onCityInput(e: WechatMiniprogram.Input) {
     this.setData({ cityInput: e.detail.value })
   },
@@ -82,6 +111,7 @@ Page({
     }
     this.setData({ feedType }, () => {
       this.applyWaterfallForType()
+      this.syncFeedMeta()
       wx.nextTick(() => this.measureScrollHeight())
     })
   },
@@ -104,7 +134,10 @@ Page({
         rightColumn,
         listCount: layoutCardsCache.length,
       },
-      () => wx.nextTick(() => this.measureScrollHeight())
+      () => {
+        this.syncFeedMeta()
+        wx.nextTick(() => this.measureScrollHeight())
+      }
     )
   },
 
@@ -148,60 +181,148 @@ Page({
     this.scheduleRelayout()
   },
 
+  applyFeedResult(
+    r: Awaited<ReturnType<typeof loadPublishedFeed>>,
+    append: boolean
+  ) {
+    if (append) {
+      if (this.data.feedType === 'provider') {
+        rawProvidersCache = rawProvidersCache.concat(r.providers)
+        providerHasMore = r.hasMoreProviders
+        providerTotal = r.providerTotal
+      } else {
+        rawRequestsCache = rawRequestsCache.concat(r.requests)
+        requestHasMore = r.hasMoreRequests
+        requestTotal = r.requestTotal
+      }
+    } else {
+      rawProvidersCache = r.providers
+      rawRequestsCache = r.requests
+      providerHasMore = r.hasMoreProviders
+      requestHasMore = r.hasMoreRequests
+      providerTotal = r.providerTotal
+      requestTotal = r.requestTotal
+    }
+
+    const empty = rawProvidersCache.length === 0 && rawRequestsCache.length === 0
+    this.setData(
+      {
+        searchMode: r.searchMode,
+        empty,
+        loading: false,
+        loadingMore: false,
+      },
+      () => {
+        loadingMore = false
+        if (!empty) {
+          this.applyWaterfallForType()
+        } else {
+          layoutCardsCache = []
+          this.setData({ leftColumn: [], rightColumn: [], listCount: 0 })
+          this.syncFeedMeta()
+        }
+      }
+    )
+  },
+
   loadFeed() {
-    this.setData({ loading: true })
+    loadingMore = false
+    this.setData({ loading: true, loadingMore: false })
     const cityQuery = this.data.activeCityQuery || undefined
-    loadPublishedFeed({ cityQuery })
+    loadPublishedFeed({ cityQuery, skip: 0, limit: FEED_PAGE_SIZE })
       .then((r) => {
         if (!r.ok) {
           rawProvidersCache = []
           rawRequestsCache = []
           layoutCardsCache = []
+          providerHasMore = false
+          requestHasMore = false
+          providerTotal = 0
+          requestTotal = 0
           this.setData({
             leftColumn: [],
             rightColumn: [],
             listCount: 0,
             empty: true,
             loading: false,
+            loadingMore: false,
+            hasMore: false,
+            feedTotal: 0,
             searchMode: cityQuery ? 'city' : 'all',
-            locationHint: feedLocationHint(cityQuery ? 'city' : 'all', cityQuery || ''),
+            locationHint: feedLocationHint(
+              cityQuery ? 'city' : 'all',
+              cityQuery || '',
+              this.data.feedType,
+              0,
+              0,
+              false
+            ),
           })
           return
         }
-        rawProvidersCache = r.providers
-        rawRequestsCache = r.requests
-        const empty = r.providers.length === 0 && r.requests.length === 0
-        this.setData(
-          {
-            searchMode: r.searchMode,
-            locationHint: feedLocationHint(r.searchMode, r.cityQuery),
-            empty,
-            loading: false,
-          },
-          () => {
-            if (!empty) {
-              this.applyWaterfallForType()
-            } else {
-              layoutCardsCache = []
-              this.setData({ leftColumn: [], rightColumn: [], listCount: 0 })
-            }
-          }
-        )
+        this.applyFeedResult(r, false)
       })
       .catch(() => {
         rawProvidersCache = []
         rawRequestsCache = []
         layoutCardsCache = []
+        loadingMore = false
         this.setData({
           leftColumn: [],
           rightColumn: [],
           listCount: 0,
           empty: true,
           loading: false,
+          loadingMore: false,
+          hasMore: false,
+          feedTotal: 0,
           searchMode: 'all',
           locationHint: '加载失败，请重试',
         })
       })
+  },
+
+  loadMoreFeed() {
+    if (loadingMore || this.data.loading) {
+      return
+    }
+    const feedType = this.data.feedType
+    const hasMore = feedType === 'provider' ? providerHasMore : requestHasMore
+    if (!hasMore) {
+      return
+    }
+
+    loadingMore = true
+    this.setData({ loadingMore: true })
+
+    const cityQuery = this.data.activeCityQuery || undefined
+    const skip =
+      feedType === 'provider' ? rawProvidersCache.length : rawRequestsCache.length
+
+    loadPublishedFeed({
+      cityQuery,
+      skip,
+      limit: FEED_PAGE_SIZE,
+      listType: feedType,
+    })
+      .then((r) => {
+        if (!r.ok) {
+          loadingMore = false
+          this.setData({ loadingMore: false })
+          wx.showToast({ title: r.errMsg || '加载失败', icon: 'none' })
+          return
+        }
+        this.applyFeedResult(r, true)
+      })
+      .catch(() => {
+        loadingMore = false
+        this.setData({ loadingMore: false })
+        wx.showToast({ title: '加载失败', icon: 'none' })
+      })
+  },
+
+  onFeedScrollToLower() {
+    this.loadMoreFeed()
   },
 
   goDetail(e: WechatMiniprogram.TouchEvent) {
